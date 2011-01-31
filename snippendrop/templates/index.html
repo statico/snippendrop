@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <h1>Snippendrop</h1>
+
+  <h2>Your projects:</h2>
+  {% if projects.count() %}
+    <ul>
+      {% for project in projects %}
+        <li>{{ project.name }}</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>You have no projects.</p>
+  {% endif %}
+
+  <h2>Create a new project:</h2>
+  <form>
+    <p>
+      {{ new_project_form.name }}
+      <button>Create</button>
+    </p>
+  </form>
+
+{% endblock %}
