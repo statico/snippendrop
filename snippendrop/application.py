@@ -67,4 +67,14 @@ def rpc_delete_snippet():
     project = Project.get_by_key_name(project_key) or abort(404)
     snippet = Snippet.get_by_key_name(snippet_key, parent=project) or abort(404)
     snippet.delete()
-    return {}
+
+@app.route('/rpc/edit_snippet_content', methods=['POST'])
+@json()
+def rpc_edit_snippet_content():
+    snippet_key = request.form.get('snippet_key') or abort(400)
+    project_key = request.form.get('project_key') or abort(400)
+
+    project = Project.get_by_key_name(project_key) or abort(404)
+    snippet = Snippet.get_by_key_name(snippet_key, parent=project) or abort(404)
+    snippet.content = request.form.get('content')
+    snippet.put()

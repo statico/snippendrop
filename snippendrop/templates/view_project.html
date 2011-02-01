@@ -8,8 +8,7 @@
 
   <div class="snippets">
     {% for snippet in snippets %}
-      <div class="snippet">
-        <var class="key">{{ snippet.key().name() }}</var>
+      <div class="snippet" data-key="{{ snippet.key().name() }}">
         {{ snippet.content }}
       </div>
     {% endfor %}
@@ -28,13 +27,7 @@
       return false;
     });
 
-    $.each($('.snippet .key'), function(i, el) {
-      var variable = $(el);
-      variable.parent('.snippet').data('key', variable.text());
-      variable.remove();
-    });
-
-    $('.snippet').live('mouseover', function() {
+    $('div.snippet').live('mouseover', function() {
       var snippet = $(this);
       if (snippet.data('close-button')) return;
 
@@ -65,9 +58,32 @@
       if (!icon) return;
       icon.fadeOut(function() {
         icon.remove();
-        snippet.data('close-button', null);
+        snippet.removeData('close-button');
       });
     });
+
+    $('div.snippet').live('click', function() {
+      var snippet = $(this);
+      var snippet_key = snippet.data('key');
+      var text = snippet.text().replace(/^\s+|\s+$/g, '');
+      var editor = $('<textarea/>').text(text).addClass('snippet');
+      snippet.replaceWith(editor);
+      editor.focus();
+      editor.blur(function() {
+        var data = {
+          snippet_key: snippet_key,
+          project_key: project_key,
+          content: editor.val(),
+        };
+        $.post('/rpc/edit_snippet_content', data, function(data) {
+          // TODO: Markdown
+          snippet.text(editor.val()).data('key', snippet_key);
+          editor.replaceWith(snippet);
+          editor.remove();
+        });
+      });
+    });
+
     </script>
 
 {% endblock %}

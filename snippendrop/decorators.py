@@ -22,6 +22,10 @@ def json():
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            return jsonify(f(*args, **kwargs))
+            result = f(*args, **kwargs)
+            if result:
+                return jsonify(result)
+            else:
+                return jsonify({})
         return decorated_function
     return decorator
