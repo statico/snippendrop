@@ -1,5 +1,5 @@
 from google.appengine.api import users
-from flask import Flask, request
+from flask import Flask, request, abort
 from uuid import uuid4
 
 from snippendrop.models import Project
@@ -10,12 +10,21 @@ app = Flask(__name__)
 app.secret_key = '\x9a\x07d5\xc9\xc7\x90KgG\xdc\xea(\x08Y\x88\x1dww)\x83\x7f\x0f\x11'
 
 @app.route('/')
-@templated('index.html')
-def index():
+@templated('list_projects.html')
+def list_projects():
     return {
         'projects': Project.get_projects_for_user(users.get_current_user()),
         'new_project_form': NewProjectForm(),
         }
+
+@app.route('/project/<key>')
+@templated('view_project.html')
+def view_project(key):
+    project = Project.get(key)
+    if project:
+        return {'project': project}
+    else:
+        abort(410)
 
 @app.route('/rpc/new_project', methods=['POST'])
 @json()
