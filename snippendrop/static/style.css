@@ -13,3 +13,10 @@ h1 {
     padding: .5em;
     width: 20%;
 }
+
+.close-icon {
+    width: 16px;
+    height: 16px;
+    background: transparent url(close.png) top left no-repeat;
+    cursor: pointer;
+}

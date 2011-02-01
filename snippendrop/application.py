@@ -47,15 +47,8 @@ def rpc_new_project():
 @app.route('/rpc/new_snippet', methods=['POST'])
 @json()
 def rpc_new_snippet():
-    key = request.form.get('project_key')
-    if not key:
-        logging.info('Key required')
-        abort(400)
-
-    project = Project.get_by_key_name(key)
-    if not project:
-        logging.info('Unknown project key: "%s"', key)
-        abort(400)
+    key = request.form.get('key') or abort(400)
+    project = Project.get_by_key_name(key) or abort(404)
 
     key = str(uuid4())
     snippet = Snippet(key_name=key,
@@ -64,3 +57,14 @@ def rpc_new_snippet():
                       content='Lorem ipsum')
     snippet.put()
     return {'key': key, 'content': snippet.content}
+
+@app.route('/rpc/delete_snippet', methods=['POST'])
+@json()
+def rpc_delete_snippet():
+    snippet_key = request.form.get('snippet_key') or abort(400)
+    project_key = request.form.get('project_key') or abort(400)
+
+    project = Project.get_by_key_name(project_key) or abort(404)
+    snippet = Snippet.get_by_key_name(snippet_key, parent=project) or abort(404)
+    snippet.delete()
+    return {}

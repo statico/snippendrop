@@ -8,7 +8,10 @@
 
   <div class="snippets">
     {% for snippet in snippets %}
-      <div class="snippet">{{ snippet.content }}</div>
+      <div class="snippet">
+        <var class="key">{{ snippet.key().name() }}</var>
+        {{ snippet.content }}
+      </div>
     {% endfor %}
   </div>
 
@@ -16,7 +19,7 @@
     var project_key = {{ project.key().name()|tojson|safe }};
 
     $('button.new-snippet').click(function() {
-      $.post('/rpc/new_snippet', {'project_key': project_key}, function(data) {
+      $.post('/rpc/new_snippet', {key: project_key}, function(data) {
         $('<div class="snippet"/>')
           .appendTo('.snippets')
           .data('key', data.key)
@@ -24,6 +27,47 @@
       });
       return false;
     });
-  </script>
+
+    $.each($('.snippet .key'), function(i, el) {
+      var variable = $(el);
+      variable.parent('.snippet').data('key', variable.text());
+      variable.remove();
+    });
+
+    $('.snippet').live('mouseover', function() {
+      var snippet = $(this);
+      if (snippet.data('close-button')) return;
+
+      var icon = $('<div class="close-icon"/>')
+        .hide()
+        .appendTo('body')
+        .css({
+          position: 'absolute',
+          top: snippet.offset().top,
+          left: snippet.offset().left + snippet.width(),
+        })
+        .fadeIn()
+        .click(function() {
+          var data = {
+            snippet_key: snippet.data('key'),
+            project_key: project_key,
+          };
+          $.post('/rpc/delete_snippet', data, function(data) {
+            icon.remove();
+            snippet.remove();
+          });
+          return false;
+        });
+      snippet.data('close-button', icon);
+    }).live('mouseout', function() {
+      var snippet = $(this);
+      var icon = snippet.data('close-button');
+      if (!icon) return;
+      icon.fadeOut(function() {
+        icon.remove();
+        snippet.data('close-button', null);
+      });
+    });
+    </script>
 
 {% endblock %}
