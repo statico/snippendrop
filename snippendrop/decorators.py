@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import request, render_template
+from flask import request, render_template, jsonify
 
 def templated(template=None):
     def decorator(f):
@@ -15,5 +15,13 @@ def templated(template=None):
             elif not isinstance(ctx, dict):
                 return ctx
             return render_template(template_name, **ctx)
+        return decorated_function
+    return decorator
+
+def json():
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            return jsonify(f(*args, **kwargs))
         return decorated_function
     return decorator
