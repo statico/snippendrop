@@ -8,6 +8,10 @@ handlers:
 - url: /static
   static_dir: snippendrop/static
 
+- url: /favicon.ico
+  static_files: snippendrop/static/logo.png
+  upload: snippendrop/static/logo.png
+
 - url: /.*
   script: main.py
   login: required
