@@ -31,7 +31,7 @@
             alert(data.error);
           } else {
             var el = $('.projects');
-            var li = el.find('ul').append('<li/>');
+            var li = $('<li/>').appendTo(el.find('ul'));
             li.append($('<a/>').attr('href', '/project/' + data.key).text(data.name));
             console.dir(data);
           }
