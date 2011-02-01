@@ -1,12 +1,15 @@
+import logging
+
 from google.appengine.api import users
 from flask import Flask, request, abort
 from uuid import uuid4
 
-from snippendrop.models import Project
+from snippendrop.models import Project, Snippet
 from snippendrop.forms import NewProjectForm
 from snippendrop.decorators import templated, json
 
 app = Flask(__name__)
+app.debug = True
 app.secret_key = '\x9a\x07d5\xc9\xc7\x90KgG\xdc\xea(\x08Y\x88\x1dww)\x83\x7f\x0f\x11'
 
 @app.route('/')
@@ -20,9 +23,10 @@ def list_projects():
 @app.route('/project/<key>')
 @templated('view_project.html')
 def view_project(key):
-    project = Project.get(key)
+    project = Project.get_by_key_name(key)
     if project:
-        return {'project': project}
+        snippets = Snippet.get_for_project(project)
+        return {'project': project, 'snippets': snippets}
     else:
         abort(410)
 
@@ -39,3 +43,24 @@ def rpc_new_project():
         return {'name': project.name, 'key': key}
     else:
         return {'error': form.errors}
+
+@app.route('/rpc/new_snippet', methods=['POST'])
+@json()
+def rpc_new_snippet():
+    key = request.form.get('project_key')
+    if not key:
+        logging.info('Key required')
+        abort(400)
+
+    project = Project.get_by_key_name(key)
+    if not project:
+        logging.info('Unknown project key: "%s"', key)
+        abort(400)
+
+    key = str(uuid4())
+    snippet = Snippet(key_name=key,
+                      parent=project,
+                      is_header=False,
+                      content='Lorem ipsum')
+    snippet.put()
+    return {'key': key, 'content': snippet.content}

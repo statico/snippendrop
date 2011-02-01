@@ -4,8 +4,24 @@
 
   <h1>{{ project.name }}</h1>
 
+  <button class="new-snippet">New snippet</button>
+
+  <div class="snippets">
+    {% for snippet in snippets %}
+      <div class="snippet">{{ snippet.content }}</div>
+    {% endfor %}
+  </div>
+
   <script type="text/javascript">
-    $('form').submit(function() {
+    var project_key = {{ project.key().name()|tojson|safe }};
+
+    $('button.new-snippet').click(function() {
+      $.post('/rpc/new_snippet', {'project_key': project_key}, function(data) {
+        $('<div class="snippet"/>')
+          .appendTo('.snippets')
+          .data('key', data.key)
+          .text(data.content);
+      });
       return false;
     });
   </script>

@@ -7,3 +7,9 @@ body {
 h1 {
     font-family: 'Arvo', serif;
 }
+
+.snippet {
+    border: 1px solid #666;
+    padding: .5em;
+    width: 20%;
+}

@@ -8,7 +8,7 @@
   <div class="projects">
     <ul>
       {% for project in projects %}
-        <li><a href="/project/{{ project.key() }}">{{ project.name }}</a></li>
+        <li><a href="/project/{{ project.key().name() }}">{{ project.name }}</a></li>
       {% else %}
         <li>You have no projects.</li>
       {% endfor %}

@@ -6,10 +6,10 @@ class Project(db.Model):
 
     @classmethod
     def get_projects_for_user(cls, user):
-        return Project.all().filter('owner =', user)
+        return cls.all().filter('owner =', user)
 
 class Snippet(db.Model):
-    project = db.ReferenceProperty(Project)
+    # parent -> reference to Project
     title = db.StringProperty()
     is_header = db.BooleanProperty()
     url = db.LinkProperty()
@@ -17,3 +17,7 @@ class Snippet(db.Model):
     content = db.TextProperty()
     blob = db.BlobProperty()
     blob_type = db.StringProperty()
+
+    @classmethod
+    def get_for_project(cls, project):
+        return cls.all().ancestor(project)
