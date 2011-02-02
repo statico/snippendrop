@@ -14,7 +14,7 @@ def list_projects():
         'new_project_form': NewProjectForm(),
         }
 
-@app.route('/project/<key>')
+@app.route('/project/<int:id>')
 @templated('view_project.html')
 def view_project(key):
     project = Project.get_by_key_name(key)

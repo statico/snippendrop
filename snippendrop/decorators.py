@@ -1,6 +1,8 @@
 from functools import wraps
 from flask import request, render_template, jsonify
 
+from snippendrop.application import app
+
 def templated(template=None):
     def decorator(f):
         @wraps(f)
@@ -29,3 +31,23 @@ def json():
                 return jsonify({})
         return decorated_function
     return decorator
+
+def rpc(f):
+    url = '/rpc/%s' % f.__name__
+    f = app.route(url, methods=['POST'])(f)
+    f = json()(f)
+    return f
+
+def rest(f):
+    url = '/rest/%s' % f.__name__
+    @app.route(url, methods=['GET', 'POST'])
+    @app.route(url + '/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+    @json()
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except AssertionError, e:
+            logging.warn('REST error: %s', e)
+            abort(400)
+    return wrapper

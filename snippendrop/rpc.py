@@ -1,31 +1,18 @@
-import logging
-
-from functools import wraps
 from flask import request, abort
 from google.appengine.api import users
-from uuid import uuid4
 
-from snippendrop.application import app
 from snippendrop.models import Project, Snippet
 from snippendrop.forms import NewProjectForm
-from snippendrop.decorators import json
-
-def rpc(f):
-    url = '/rpc/%s' % f.__name__
-    f = app.route(url, methods=['POST'])(f)
-    f = json()(f)
-    return f
+from snippendrop.decorators import rpc
 
 @rpc
 def new_project():
     form = NewProjectForm(request.form)
     if form.validate():
-        key = str(uuid4()) # TODO: Better project IDs
-        project = Project(key_name=key,
-                          name=form.name.data,
+        project = Project(name=form.name.data,
                           owner=users.get_current_user())
         project.put()
-        return {'name': project.name, 'key': key}
+        return {'name': project.name, 'id': id}
     else:
         return {'error': form.errors}
 
@@ -34,9 +21,7 @@ def new_snippet():
     key = request.form.get('key') or abort(400)
     project = Project.get_by_key_name(key) or abort(404)
 
-    key = str(uuid4())
-    snippet = Snippet(key_name=key,
-                      parent=project,
+    snippet = Snippet(project=project,
                       is_header=False,
                       content='Lorem ipsum')
     snippet.put()

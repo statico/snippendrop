@@ -11,6 +11,7 @@ handlers:
 - url: /favicon.ico
   static_files: snippendrop/static/logo.png
   upload: snippendrop/static/logo.png
+  expiration: 1d
 
 - url: /.*
   script: main.py
