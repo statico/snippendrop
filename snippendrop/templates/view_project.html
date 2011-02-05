@@ -15,7 +15,8 @@
   </div>
 
   <script type="text/javascript">
-    var project_key = {{ project.key().name()|tojson|safe }};
+    var project_id = {{ project.key().id()|tojson|safe }};
+    var snippets = make_snippet_collection(project_id);
 
     $('button.new-snippet').click(function() {
       $.post('/rpc/new_snippet', {key: project_key}, function(data) {

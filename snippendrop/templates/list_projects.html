@@ -10,34 +10,41 @@
   </div>
 
   <h2>Create a new project:</h2>
-  <form class="new-project">
-    <p>
-      {{ new_project_form.name }}
-      <button>Create</button>
-    </p>
-  </form>
+  <p>
+    {{ new_project_form.name }}
+    <button class="new-project">New project</button>
+  </p>
 
   <script type="text/javascript">
 
-  /* MODELS --------------------------------------------------------------- */
-
-  var Project = Backbone.Model.extend({
-    url: function() {
-      return this.id ? '/rest/projects/' + this.id : '/rest/projects';
+  var ProjectView = Backbone.View.extend({
+    tagName: 'li',
+    template: _.template($('#project-template').html()),
+    events: {
+      'click .delete': 'delete'
     },
-    viewUrl: function() {
-      return '/project/' + this.id;
+    initialize: function() {
+      _.bindAll(this, 'render', 'delete');
+      this.model.bind('change', this.render);
+      this.model.view = this;
+    },
+    render: function() {
+      $(this.el).html(this.template(this.model));
+      return this;
+    },
+    delete: function() {
+      this.model.destroy();
+      this.remove();
+      return false;
     }
   });
 
-  var Projects = Backbone.Collection.extend({
-    model: Project,
-    url: '/rest/projects'
-  });
+  var AppView = Bacokbone.View.extend({
+    el: $('.projects'),
+    events: {
+      '.new-project click': newProject,
 
-  var projects = new Projects();
-
-  /* CONTROLLERS ---------------------------------------------------------- */
+    initialize
 
   projects.bind('add', function(project) {
     if (!$('.projects ul').length) {
@@ -45,15 +52,12 @@
     }
     var template = '<li><a href="{\{ url }\}">{\{ name }\}</a></li>';
     var context = {url: project.viewUrl(), name: project.get('name')};
-    var el = $(Mustache.to_html(template, context)).hide();
-    $('.projects ul').append(el.fadeIn());
+    $('.projects ul').append(Mustache.to_html(template, context));
   });
 
   {% for obj in projects %}
   projects.add({{ obj.to_dict()|tojson|safe }});
   {% endfor %}
-
-  /* EVENTS---------------------------------------------------------------- */
 
   $('form.new-project button').click(function() {
     var input = $('#name');
@@ -65,6 +69,16 @@
     return false;
   });
 
+  $('.delete').live('click', function() {
+    var pid = $(this).data('pid');
+    return false;
+  });
+
+  </script>
+
+  <script type="text/template" id="project-template">
+    <a href="<%= getUrl() %>"><%= name %></a>
+    (<a href="#" class="delete-project" data-id="<%= id %>">X</a>)
   </script>
 
 {% endblock %}
