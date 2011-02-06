@@ -1,27 +1,29 @@
-from google.appengine.api import users
-from flask import abort
+from flask import request, redirect, flash, session, url_for
 
 from snippendrop.application import app
-from snippendrop.models import Project, Snippet
-from snippendrop.forms import NewProjectForm
+from snippendrop.forms import LoginForm, LogoutForm
+from snippendrop.models import User
 from snippendrop.decorators import templated
 
-@app.route('/')
-@templated('list_projects.html')
-def list_projects():
-    user = users.get_current_user()
-    return {
-        'projects': Project.get_projects_for_user(user),
-        'new_project_form': NewProjectForm(),
-        }
+@app.route('/', methods=['GET', 'POST'])
+@templated('welcome.html')
+def welcome():
+    form = LoginForm(request.form)
+    if request.method == 'POST' and form.validate():
+        if User.check_login(form.username.data, form.password.data):
+            session['username'] = form.username.data
+            return redirect(url_for('project'))
+        else:
+            flash('Invalid username or password')
+    return dict(
+        login_form=form,
+        logout_form=LogoutForm())
 
-@app.route('/project/<int:id>')
-@templated('view_project.html')
-def view_project(id=None):
-    user = users.get_current_user()
-    project = Project.get_by_id_and_user(id, user)
-    if project:
-        snippets = Snippet.get_for_project(project)
-        return {'project': project, 'snippets': snippets}
-    else:
-        abort(410)
+@app.route('/logout', methods=['POST'])
+def logout():
+    session['username'] = None
+    return redirect(url_for('welcome'))
+
+@app.route('/p')
+def project():
+    return 'ok'

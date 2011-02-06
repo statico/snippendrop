@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <h1>Welcome to Snippendrop</h1>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="error">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  {% with form = login_form %}
+    {% if form.errors %}
+      <ul class="error">
+        {% for name, messages in form.errors.items() %}
+          <li>{{ name }}: {{ messages|join(' ') }}</li>
+  {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  {% if g.user %}
+    {% with form = logout_form %}
+      <form method="post" action="{{ url_for('logout') }}">
+        {{ form.csrf }}
+        <p>Welcome back, {{ g.user.username }}</p>
+        <button>Logout</button>
+      </form>
+    {% endwith %}
+  {% else %}
+    {% with form = login_form %}
+      <form method="post">
+        {{ form.csrf }}
+        <p>
+          {{ form.username.label }}: {{ form.username }}<br/>
+          {{ form.password.label }}: {{ form.password }}<br/>
+          <button>Login</button>
+        </p>
+      </form>
+    {% endwith %}
+  {% endif %}
+
+{% endblock %}

@@ -1,43 +1,82 @@
-import logging
+from flask import session, g
+from flaskext.sqlalchemy import SQLAlchemy
+from sqlalchemy.orm.exc import NoResultFound
+from werkzeug import generate_password_hash, check_password_hash
 
-from google.appengine.ext import db
+from snippendrop.application import app
+
+db = SQLAlchemy(app)
+
+@app.before_request
+def add_current_user_to_session():
+    g.user = None
+    username = session.get('username')
+    if username:
+        try:
+            g.user = User.query.filter(User.username==username).one()
+        except NoResultFound:
+            app.logger.warn('Session username was "%s" but no user found', username)
+
+
+class User(db.Model):
+    __tablename__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True)
+    pw_hash = db.Column(db.String(80))
+
+    def __init__(self, username, password):
+        self.username = username
+        self.set_password(password)
+
+    def set_password(self, password):
+        self.pw_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.pw_hash, password)
+
+    @classmethod
+    def check_login(cls, username, password):
+        try:
+            user = cls.query.filter(cls.username==username).one()
+            return user.check_password(password)
+        except NoResultFound:
+            return False
+
 
 class Project(db.Model):
-    name = db.StringProperty(required=True)
-    owner = db.UserProperty(required=True)
+    __tablename__ = 'projects'
+
+    id = db.Column(db.Integer, primary_key=True)
+    owner_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    title = db.Column(db.String(255), nullable=False)
+
+    owner = db.relationship(User, backref=db.backref('projects', order_by=id))
 
     def to_dict(self):
-        return {
-            'id': self.key().id(),
-            'name': self.name,
-            }
+        obj = {}
+        for attr in ('id', 'owner_id', 'title'):
+            obj[attr] = getattr(self, attr)
+        return obj
 
     @classmethod
-    def get_projects_for_user(cls, user):
-        return cls.all().filter('owner =', user)
+    def get_by_id_and_owner(cls, id, owner):
+        return cls.query.filter(cls.id==id).filter(cls.owner_id==owner.id).first()
 
-    @classmethod
-    def get_by_id_and_user(cls, id, user):
-        obj = cls.get_by_id(id)
-        if obj and obj.owner == user:
-            return obj
 
 class Snippet(db.Model):
-    project = db.ReferenceProperty(Project)
-    title = db.StringProperty()
-    is_header = db.BooleanProperty()
-    url = db.LinkProperty(indexed=False)
-    excerpt = db.TextProperty(indexed=False)
-    content = db.TextProperty(indexed=False)
-    blob = db.BlobProperty(indexed=False)
-    blob_type = db.StringProperty(indexed=False)
+    __tablename__ = 'snippets'
 
-    @classmethod
-    def get_for_project(cls, project):
-        return cls.all().ancestor(project)
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
+    kind = db.Column(db.Enum('text', 'header', nullable=False))
+    title = db.Column(db.String(255))
+    content = db.Column(db.Text())
 
-    @classmethod
-    def get_by_id_and_user(cls, id, user):
-        obj = cls.get_by_id(id)
-        if obj and obj.owner == user:
-            return obj
+    project = db.relationship(Project, backref=db.backref('snippets', order_by=id))
+
+    def to_dict(self):
+        obj = {}
+        for attr in ('id', 'project_id', 'title', 'is_header', 'content'):
+            obj[attr] = getattr(self, attr)
+        return obj
