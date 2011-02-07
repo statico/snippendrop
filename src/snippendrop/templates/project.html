@@ -2,22 +2,58 @@
 
 {% block content %}
 
-  <h1>Snippendrop</h1>
+  <div id="list">
 
-  <h2>Your projects:</h2>
-  <div class="projects">
-    You have no projects. Why not add one?
+    <h1>Snippendrop</h1>
+
+    <h2>Your projects:</h2>
+    <div class="projects">
+      You have no projects. Why not add one?
+    </div>
+
+    <h2>Create a new project:</h2>
+    <p>
+      {{ new_project_form.name }}
+      <button class="new-project">New project</button>
+    </p>
+
   </div>
 
-  <h2>Create a new project:</h2>
-  <p>
-    {{ new_project_form.name }}
-    <button class="new-project">New project</button>
-  </p>
+  <div id="view">
 
-  <script type="text/template" id="project-template">
+    <h1 class="title"></h1>
+
+    <div class="snippets">
+    </div>
+
+  </div>
+
+  <script type="text/template" id="project-list-itemruns">
     <a href="<%= getUrl() %>"><%= name %></a>
     (<a href="#" class="delete-project" data-id="<%= id %>">X</a>)
+  </script>
+
+  <script type="text/template" id="header-snippet">
+    <div class="snippet">
+      <h2><%= title %></h2>
+    </div>
+  </script>
+
+  <script type="text/template" id="text-snippet">
+    <div class="snippet">
+      <%= content %>
+    </div>
+  </script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      new App();
+      Backbone.history.start();
+
+      {% for obj in projects %}
+      projects.add({{ obj.to_dict()|tojson|safe }});
+      {% endfor %}
+    });
   </script>
 
 {% endblock %}
