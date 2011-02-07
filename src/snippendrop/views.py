@@ -1,9 +1,9 @@
-from flask import request, redirect, flash, session, url_for
+from flask import request, redirect, flash, session, url_for, g
 
 from snippendrop.application import app
 from snippendrop.forms import LoginForm, LogoutForm
 from snippendrop.models import User
-from snippendrop.decorators import templated
+from snippendrop.decorators import templated, login_required
 
 @app.route('/', methods=['GET', 'POST'])
 @templated('welcome.html')
@@ -25,5 +25,7 @@ def logout():
     return redirect(url_for('welcome'))
 
 @app.route('/p')
+@login_required
+@templated('project.html')
 def project():
-    return 'ok'
+    return dict(projects=g.user.projects)

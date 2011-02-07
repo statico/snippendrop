@@ -1,7 +1,18 @@
 from functools import wraps
-from flask import request, render_template, jsonify
+from flask import request, render_template, jsonify, g, redirect, url_for
 
 from snippendrop.application import app
+
+def login_required():
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if g.user:
+                return f(*args, **kwargs)
+            else:
+                return redirect(url_for('welcome'))
+        return decorated_function
+    return decorator
 
 def templated(template=None):
     def decorator(f):
