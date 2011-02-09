@@ -12,10 +12,13 @@
     </div>
 
     <h2>Create a new project:</h2>
-    <p>
-      {{ new_project_form.name }}
-      <button class="new-project">New project</button>
-    </p>
+    {% with form = new_project_form %}
+      <p>
+        {{ form.title.label }}:
+        {{ form.title() }}
+        <button class="new-project">New project</button>
+      </p>
+    {% endwith %}
 
   </div>
 
@@ -28,7 +31,7 @@
 
   </div>
 
-  <script type="text/template" id="project-list-itemruns">
+  <script type="text/template" id="project-list-item">
     <a href="<%= getUrl() %>"><%= name %></a>
     (<a href="#" class="delete-project" data-id="<%= id %>">X</a>)
   </script>

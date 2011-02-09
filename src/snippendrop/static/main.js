@@ -1,9 +1,41 @@
 /* MODELS --------------------------------------------------------------- */
 
+var Snippet = Backbone.Model.extend({
+
+  defaults: {
+    project: null,
+  },
+
+  /*
+  url: function() {
+    return this.id ? base_url + '/' + this.id : base_url;
+  },
+  */
+
+});
+
+var Snippets = Backbone.Collection.extend({
+  model: Snippets,
+});
+
 var Project = Backbone.Model.extend({
+
+  defaults: {
+    _snippets: null
+  },
+
   url: function() {
     return this.id ? '/rest/projects/' + this.id : '/rest/projects';
   },
+
+  snippets: function() {
+    if (!this.snippets) {
+      this.snippets = new Snippets();
+      this.snippets.project = this;
+    }
+    return this.snippets;
+  },
+
 });
 
 var Projects = Backbone.Collection.extend({
@@ -13,33 +45,31 @@ var Projects = Backbone.Collection.extend({
 
 var projects = new Projects();
 
-function make_snippet_collection(project_id) {
-  var base_url = '/rest/project/' + project_id + '/snippets';
+/* VIEWS --------------------------------------------------------------- */
 
-  var Snippet = Backbone.Model.extend({
-    url: function() {
-      return this.id ? base_url + '/' + this.id : base_url;
-    },
-  });
+var ProjectsView = Backbone.View.extend({
 
-  var Snippets = Backbone.Collection.extend({
-    model: Snippets,
-  });
+  initialize: function(options) {
+  },
 
-  return new Snippets();
-}
+  render: function() {
+    this.el = _.template($('#project-list-item').html(), this.model);
+  },
+
+});
+
 
 /* CONTROLER ----------------------------------------------------------- */
 
 var App = Backbone.Controller.extend({
 
   routes: {
-    '': 'list',
+    '': 'index',
     ':id': 'view'
   },
 
-  list: function() {
-    console.log('list');
+  index: function() {
+
   },
 
   view: function(id) {
@@ -50,41 +80,41 @@ var App = Backbone.Controller.extend({
 
 /* PROJECT LIST ----------------------------------------------------------- */
 
+/*
 var project_list_item_tmpl = $('#project-list-item').html();
 
 projects.bind('add', function(project) {
   if (!$('.projects ul').length) {
     $('.projects').empty().append('<ul/>');
   }
-  $('.projects ul').append(Mustache.to_html(template, context));
+  $('.projects ul').append(_.template(project_list_item_tmpl, project));
+});
+
+var ProjectListItemView = Backbone.View.extend({
+  tagName: 'li',
+  template: _.template(project_list_item_tmpl),
+  events: {
+    'click .delete': 'delete'
+  },
+  initialize: function() {
+    _.bindAll(this, 'render', 'delete');
+    this.model.bind('change', this.render);
+    this.model.view = this;
+  },
+  render: function() {
+    $(this.el).html(this.template(this.model));
+    return this;
+  },
+  delete: function() {
+    this.model.destroy();
+    this.remove();
+    return false;
+  }
 });
 
 /* OLD --------------------------------------------------------------- */
 
 /*
-
-var ProjectView = Backbone.View.extend({
-tagName: 'li',
-template: _.template($('#project-template').html()),
-events: {
-'click .delete': 'delete'
-},
-initialize: function() {
-_.bindAll(this, 'render', 'delete');
-this.model.bind('change', this.render);
-this.model.view = this;
-},
-render: function() {
-$(this.el).html(this.template(this.model));
-return this;
-},
-delete: function() {
-this.model.destroy();
-this.remove();
-return false;
-}
-});
-
 var project_id = {{ project.key().id()|tojson|safe }};
 var snippets = make_snippet_collection(project_id);
 

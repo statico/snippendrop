@@ -8,4 +8,4 @@ class LogoutForm(Form):
     pass
 
 class NewProjectForm(Form):
-    name = TextField('Project name', [Length(min=1, max=500)])
+    title = TextField('Project title', [Length(min=1, max=500)])

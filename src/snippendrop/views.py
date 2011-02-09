@@ -26,8 +26,8 @@ def logout():
 
 @app.route('/p')
 @login_required()
-@templated('project.html')
-def project():
+@templated('app.html')
+def app():
     return dict(
         projects=g.user.projects,
-        new_project_form=NewProjectForm)
+        new_project_form=NewProjectForm())
