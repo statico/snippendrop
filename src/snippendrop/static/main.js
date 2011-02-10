@@ -130,19 +130,24 @@ App.View.SnippetView = Backbone.View.extend({
   },
   editSnippet: function() {
     var snippet = this.snippet;
-    console.log('editing snippet', snippet.id);
-    this.$('.viewer').hide();
-    this.$('.editor').val(snippet.get('content')).show().focus();
+    var editor = this.$('.editor'), viewer = this.$('.viewer');
+    viewer.hide();
+    editor
+      .val(snippet.get('content'))
+      .width(viewer.width() + 'px')
+      .height(viewer.height() + 30 + 'px')
+      .show()
+      .focus();
   },
   viewSnippet: function() {
     var snippet = this.snippet;
-    console.log('viewing snippet', snippet.id);
-    snippet.save({content: this.$('.editor').val()});
-    this.$('.editor').hide();
+    var editor = this.$('.editor'), viewer = this.$('.viewer');
+    snippet.save({content: editor.val()});
+    editor.hide();
 
     var kind = snippet.get('kind');
     var template = this.templates[kind];
-    this.$('.viewer').html(template(snippet.toJSON())).show();
+    viewer.html(template(snippet.toJSON())).show();
   }
 });
 
