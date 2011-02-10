@@ -2,8 +2,8 @@
 
 from snippendrop.application import app
 
-import snippendrop.views
-import snippendrop.rest
+import snippendrop.user_views
+import snippendrop.json_views
 
 if __name__ == '__main__':
   app.run()

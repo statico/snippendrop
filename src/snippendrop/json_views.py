@@ -4,14 +4,17 @@ from werkzeug import MultiDict
 from snippendrop.application import app
 from snippendrop.models import Project, Snippet
 from snippendrop.forms import ProjectForm
-from snippendrop.decorators import rest
+from snippendrop.decorators import jsonify, catch_assertions
 
 # TODO: Encrypt IDs, see PyCrypto
 # TODO: Caching
 
 logger = app.logger
 
-@rest
+@app.route('/json/projects', methods=['GET', 'POST'])
+@app.route('/json/projects/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+@catch_assertions
+@jsonify
 def projects(id=None):
     user = g.user
 
@@ -59,10 +62,13 @@ def projects(id=None):
         return {'success': True}
 
 
-@rest
-def snippets(id=None):
+@app.route('/json/projects/<int:pid>/snippets', methods=['GET', 'POST'])
+@app.route('/json/projects/<int:pid>/snippets/<int:sid>', methods=['GET', 'PUT', 'DELETE'])
+@catch_assertions
+@jsonify
+def snippets(pid=None, sid=None):
+    assert pid, 'pid required'
     user = g.user
-    data = MultiDict(request.json)
 
     if request.method == 'GET':
         assert id
@@ -74,6 +80,7 @@ def snippets(id=None):
             abort(404)
 
     elif request.method == 'POST': # Create
+        data = MultiDict(request.json)
         assert not id, 'No id allowed'
         project = Project.get_by_id_and_user(data.get('project'), user)
         assert project, 'Valid project required'

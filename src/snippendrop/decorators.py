@@ -35,19 +35,17 @@ def templated(template=None):
         return decorated_function
     return decorator
 
-def jsonify():
+def jsonify(f):
     """
     More useful than Flask's `jsonify` because it allows lists and
     None to be returned.
     """
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            result = f(*args, **kwargs)
-            data = json.dumps(result, indent=None if request.is_xhr else 2)
-            return app.response_class(data, mimetype='application/json')
-        return decorated_function
-    return decorator
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        result = f(*args, **kwargs)
+        data = json.dumps(result, indent=None if request.is_xhr else 2)
+        return app.response_class(data, mimetype='application/json')
+    return decorated_function
 
 def rpc(f):
     url = '/rpc/%s' % f.__name__
@@ -55,16 +53,15 @@ def rpc(f):
     f = json()(f)
     return f
 
-def rest(f):
-    url = '/json/%s' % f.__name__
-    @app.route(url, methods=['GET', 'POST'])
-    @app.route(url + '/<int:id>', methods=['GET', 'PUT', 'DELETE'])
-    @jsonify()
+def catch_assertions(f):
+    """
+    `AssertionError`s become 400 BAD REQUEST responses.
+    """
     @wraps(f)
-    def wrapper(*args, **kwargs):
+    def decorated_function(*args, **kwargs):
         try:
             return f(*args, **kwargs)
         except AssertionError, e:
-            logger.warn('REST error: %s', e)
+            logger.debug('Assertion failed: %s', e)
             abort(400)
-    return wrapper
+    return decorated_function

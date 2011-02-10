@@ -6,16 +6,34 @@ var App = {
 
 App.Model.Project = Backbone.Model.extend({
   defaults: {
-    title: 'New project',
+    title: 'New project'
   },
   url: function() {
-    return this.id ? '/json/projects/' + this.id : '/json/projects';
+    var base = '/json/projects';
+    return this.id ? base + '/' + this.id : base;
+  }
+});
+
+App.Model.Snippet = Backbone.Model.extend({
+  defaults: {
+    project_id: 0,
+    type: 'text',
+    content: 'hello world'
+  },
+  url: function() {
+    var base = '/json/snippets';
+    return this.id ? base + '/' + this.id : base;
   }
 });
 
 App.Collection.Projects = Backbone.Collection.extend({
   model: App.Model.Project,
   url: '/json/projects'
+});
+
+App.Collection.Snippets = Backbone.Collection.extend({
+  model: App.Model.Project,
+  url: '/json/snippets'
 });
 
 App.View.ProjectList = Backbone.View.extend({
