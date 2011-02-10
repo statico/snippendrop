@@ -111,6 +111,22 @@ App.View.SnippetView = Backbone.View.extend({
 
     _.bindAll(this, 'render', 'editSnippet', 'viewSnippet');
     this.render();
+
+    $(this.el)
+      .drag('start', function() {
+        $(this).css('opacity', 0.4);
+      })
+      .drag(function(event, dd) {
+        $(this).css({
+          position: 'absolute',
+          top: dd.offsetY,
+          left: dd.offsetX
+        });
+      }, {click: false})
+      .drag('end', function() {
+        $(this).css('opacity', 1);
+      });
+
   },
   events: {
     'click .viewer': 'editSnippet',
@@ -131,13 +147,13 @@ App.View.SnippetView = Backbone.View.extend({
   editSnippet: function() {
     var snippet = this.snippet;
     var editor = this.$('.editor'), viewer = this.$('.viewer');
-    viewer.hide();
     editor
       .val(snippet.get('content'))
       .width(viewer.width() + 'px')
-      .height(viewer.height() + 30 + 'px')
+      .height(viewer.height() + 'px')
       .show()
       .focus();
+    viewer.hide();
   },
   viewSnippet: function() {
     var snippet = this.snippet;

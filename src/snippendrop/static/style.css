@@ -2,19 +2,40 @@
 
 body {
     font-family: sans-serif;
+    background: #ccc url('bg.png');
 }
 
 h1 {
     font-family: 'Arvo', serif;
+    text-shadow: #fff 0px 1px 0px;
 }
 
-.snippet .viewer, .snippet .editor {
-    border: 2px solid #999;
-    padding: .5em;
-    width: 20%;
+textarea {
+    font-size: 100%;
 }
-.snippet .viewer:hover {
-    border-color: #090;
+
+.snippet {
+    background: #fff;
+    border: 1px solid #C5C5C5;
+    -webkit-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.15);
+    width: 250px;
+    margin-bottom: 20px;
+}
+.snippet:hover {
+    -webkit-box-shadow: 0 1px 5px #ff0;
+}
+.snippet .viewer, .snippet .editor {
+    padding: 10px;
+    margin: 0;
+}
+.snippet .viewer {
+    cursor: pointer;
+}
+.snippet .editor {
+    width: 100%;
+    border: none;
+    display: block;
+    -webkit-box-shadow: 0 0 0 #fff;
 }
 
 .close-icon {
