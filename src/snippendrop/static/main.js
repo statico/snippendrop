@@ -1,13 +1,24 @@
-var Project = Backbone.Model.extend({
+var App = {
+  Model: {},
+  Collection: {},
+  View: {}
+};
+
+App.Model.Project = Backbone.Model.extend({
   defaults: {
     title: 'New project',
   },
+  url: function() {
+    return this.id ? '/json/projects/' + this.id : '/json/projects';
+  }
 });
 
-var ProjectList = Backbone.Collection.extend({
-  model: Project,
+App.Collection.Projects = Backbone.Collection.extend({
+  model: App.Model.Project,
+  url: '/json/projects/'
 });
 
+/*
 var projects = new ProjectList();
 
 var ProjectView = Backbone.View.extend({

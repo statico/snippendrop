@@ -59,6 +59,17 @@ class Project(db.Model):
             obj[attr] = getattr(self, attr)
         return obj
 
+    def put(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def save(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
     @classmethod
     def get_by_id_and_owner(cls, id, owner):
         return cls.query.filter(cls.id==id).filter(cls.owner_id==owner.id).first()

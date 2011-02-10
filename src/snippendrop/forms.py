@@ -7,5 +7,5 @@ class LoginForm(Form):
 class LogoutForm(Form):
     pass
 
-class NewProjectForm(Form):
+class ProjectForm(Form):
     title = TextField('Project title', [Length(min=1, max=500)])

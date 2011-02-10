@@ -50,7 +50,7 @@ def rpc(f):
     return f
 
 def rest(f):
-    url = '/rest/%s' % f.__name__
+    url = '/json/%s' % f.__name__
     @app.route(url, methods=['GET', 'POST'])
     @app.route(url + '/<int:id>', methods=['GET', 'PUT', 'DELETE'])
     @json()

@@ -2,32 +2,23 @@
 
 {% block content %}
 
-  <div id="list">
+  <h1>Welcome to Snippendrop</h1>
 
-    <h1>Snippendrop</h1>
+  <h2>Your projects:</h2>
 
-    <h2>Your projects:</h2>
-    <ul>
-      <li class="message">You have no projects. Why not add one?</li>
-    </ul>
+  <ul id="list">
+    <li class="message">You have no projects. Why not add one?</li>
+  </ul>
 
-    <h2>Create a new project:</h2>
-    {% with form = new_project_form %}
-      <p>
-        {{ form.title.label }}:
-        {{ form.title() }}
-        <button class="new-project">New project</button>
-      </p>
-    {% endwith %}
-
-  </div>
-
-  <div id="view">
-
-    <h1 class="title"></h1>
-
-    <div class="snippets">
-    </div>
+  <h2>Create a new project:</h2>
+  
+  {% with form = new_project_form %}
+    <p>
+      {{ form.title.label }}:
+      {{ form.title() }}
+      <button class="new-project">New project</button>
+    </p>
+  {% endwith %}
 
   </div>
 

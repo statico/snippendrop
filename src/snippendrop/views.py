@@ -1,7 +1,7 @@
 from flask import request, redirect, flash, session, url_for, g
 
 from snippendrop.application import app
-from snippendrop.forms import LoginForm, LogoutForm, NewProjectForm
+from snippendrop.forms import LoginForm, LogoutForm, ProjectForm
 from snippendrop.models import User
 from snippendrop.decorators import templated, login_required
 
@@ -24,10 +24,17 @@ def logout():
     session['username'] = None
     return redirect(url_for('welcome'))
 
-@app.route('/p')
+@app.route('/projects/')
 @login_required()
-@templated('app.html')
-def app():
+@templated('list_projects.html')
+def list_projects():
     return dict(
-        projects=g.user.projects,
-        new_project_form=NewProjectForm())
+        form=ProjectForm())
+
+@app.route('/project/:id/')
+@login_required()
+@templated('edit_project.html')
+def edit_project(id):
+    # TODO
+    return dict(
+        form=ProjectForm())
