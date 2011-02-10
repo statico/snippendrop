@@ -1,7 +1,11 @@
+import json
+
 from functools import wraps
-from flask import request, render_template, jsonify, g, redirect, url_for
+from flask import request, render_template, g, redirect, url_for, abort
 
 from snippendrop.application import app
+
+logger = app.logger
 
 def login_required():
     def decorator(f):
@@ -31,15 +35,17 @@ def templated(template=None):
         return decorated_function
     return decorator
 
-def json():
+def jsonify():
+    """
+    More useful than Flask's `jsonify` because it allows lists and
+    None to be returned.
+    """
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             result = f(*args, **kwargs)
-            if result:
-                return jsonify(result)
-            else:
-                return jsonify({})
+            data = json.dumps(result, indent=None if request.is_xhr else 2)
+            return app.response_class(data, mimetype='application/json')
         return decorated_function
     return decorator
 
@@ -53,12 +59,12 @@ def rest(f):
     url = '/json/%s' % f.__name__
     @app.route(url, methods=['GET', 'POST'])
     @app.route(url + '/<int:id>', methods=['GET', 'PUT', 'DELETE'])
-    @json()
+    @jsonify()
     @wraps(f)
     def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
         except AssertionError, e:
-            logging.warn('REST error: %s', e)
+            logger.warn('REST error: %s', e)
             abort(400)
     return wrapper
