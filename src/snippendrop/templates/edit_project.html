@@ -2,25 +2,7 @@
 
 {% block content %}
 
-  <h1>Welcome to Snippendrop</h1>
-
-  <h2>Your projects:</h2>
-
-  <ul id="list">
-    <li class="message">You have no projects. Why not add one?</li>
-  </ul>
-
-  <h2>Create a new project:</h2>
-  
-  {% with form = new_project_form %}
-    <p>
-      {{ form.title.label }}:
-      {{ form.title() }}
-      <button class="new-project">New project</button>
-    </p>
-  {% endwith %}
-
-  </div>
+  <h1>{{ project.title }}</h1>
 
   <script type="text/template" id="project-list-item">
     <a href="#" class="open"><%= title %></a>
@@ -42,12 +24,6 @@
   <script src="/static/main.js" type="text/javascript"></script>
   <script type="text/javascript">
     $(function() {
-      new ProjectListView();
-      // Backbone.History.start();
-
-      {% for obj in projects %}
-      projects.add({{ obj.to_dict()|tojson|safe }});
-      {% endfor %}
     });
   </script>
 

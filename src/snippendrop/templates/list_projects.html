@@ -7,7 +7,7 @@
   <h2>Your projects:</h2>
 
   <ul id="list">
-    <li class="message">You have no projects. Why not add one?</li>
+    <li class="empty-message">You have no projects. Why not add one?</li>
   </ul>
 
   <h2>Create a new project:</h2>
@@ -23,11 +23,16 @@
   <script src="/static/main.js" type="text/javascript"></script>
   <script type="text/javascript">
     $(function() {
+      var projects = new App.Collection.Projects();
+      new App.View.ProjectList({el: $('#list'), projects: projects});
+      {% for obj in projects %}
+        projects.add({{ obj.to_dict()|tojson|safe }});
+      {% endfor %}
     });
   </script>
 
-  <script type="text/template" id="project-list-item">
-    <a href="#" class="open"><%= title %></a>
+  <script type="text/template" id="item-template">
+    <a href="/project/<%= id %>"><%= title %></a>
     (<a href="#" class="delete">X</a>)
   </script>
 

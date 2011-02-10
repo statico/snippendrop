@@ -1,9 +1,11 @@
-from flask import request, redirect, flash, session, url_for, g
+from flask import request, redirect, flash, session, url_for, g, abort
 
 from snippendrop.application import app
 from snippendrop.forms import LoginForm, LogoutForm, ProjectForm
-from snippendrop.models import User
+from snippendrop.models import User, Project
 from snippendrop.decorators import templated, login_required
+
+logger = app.logger
 
 @app.route('/', methods=['GET', 'POST'])
 @templated('welcome.html')
@@ -28,13 +30,17 @@ def logout():
 @login_required()
 @templated('list_projects.html')
 def list_projects():
+    user = g.user
     return dict(
+        projects=user.projects,
         form=ProjectForm())
 
-@app.route('/project/:id/')
+@app.route('/project/<int:id>/')
 @login_required()
 @templated('edit_project.html')
 def edit_project(id):
-    # TODO
-    return dict(
-        form=ProjectForm())
+    user = g.user
+    project = Project.get_by_id_and_owner(id, user)
+    logger.debug('No project found for user %s and id %s', user, id)
+    if not project: abort(404)
+    return dict(project=project)
