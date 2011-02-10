@@ -90,8 +90,9 @@ App.View.ProjectList = Backbone.View.extend({
                  project.get('title') + '" ?'))
       return;
 
+    var that = this;
     project.destroy({success: function(project, response) {
-      this.projects.remove(project);
+      that.projects.remove(project);
     }});
     return false;
   }
