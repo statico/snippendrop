@@ -14,7 +14,7 @@ def welcome():
     if request.method == 'POST' and form.validate():
         if User.check_login(form.username.data, form.password.data):
             session['username'] = form.username.data
-            return redirect(url_for('project'))
+            return redirect(url_for('list_projects'))
         else:
             flash('Invalid username or password')
     return dict(

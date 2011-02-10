@@ -4,26 +4,37 @@
 
   <h1>{{ project.title }}</h1>
 
-  <script type="text/template" id="project-list-item">
-    <a href="#" class="open"><%= title %></a>
-    (<a href="#" class="delete">X</a>)
+  <div id="snippet-editor"></div>
+
+  <script type="text/javascript">
+    $(function() {
+      var project = new App.Model.Project({{ project.to_dict()|tojson|safe }});
+      var snippets = project.snippets();
+      snippets.fetch({
+        // TODO: Make inline.
+        success: function(snippets, response) {
+          new App.View.SnippetEditor({
+            el: $('#snippet-editor'),
+            project: project
+          });
+        },
+        error: function(snippets, response) {
+          alert('There was an error while loading the project.');
+        },
+      });
+    });
   </script>
 
-  <script type="text/template" id="header-snippet">
+  <script type="text/template" class="snippet-template header">
     <div class="snippet">
       <h2><%= title %></h2>
     </div>
   </script>
 
-  <script type="text/template" id="text-snippet">
+  <script type="text/template" class="snippet-template text">
     <div class="snippet">
       <%= content %>
     </div>
-  </script>
-
-  <script type="text/javascript">
-    $(function() {
-    });
   </script>
 
 {% endblock %}

@@ -13,7 +13,9 @@ App.Model.Project = Backbone.Model.extend({
     return this.id ? base + '/' + this.id : base;
   },
   snippets: function() {
-    return new App.Collection.Snippets({project: this});
+    if (this._snippets === undefined)
+      this._snippets = new App.Collection.Snippets({project: this});
+    return this._snippets;
   }
 });
 
@@ -92,5 +94,31 @@ App.View.ProjectList = Backbone.View.extend({
       this.projects.remove(project);
     }});
     return false;
+  }
+});
+
+App.View.SnippetEditor = Backbone.View.extend({
+  initialize: function(options) {
+    this.el = options.el;
+    this.project = options.project;
+    this.snippets = this.project.snippets();
+
+    this.templates = {
+      text: _.template($('.snippet-template.text').html()),
+      header: _.template($('.snippet-template.text').html()),
+    };
+
+    _.bindAll(this, 'render');
+    this.render();
+  },
+  render: function() {
+    var that = this;
+    this.el.empty();
+    this.snippets.each(function(snippet) {
+      var kind = snippet.get('kind');
+      var template = that.templates[kind];
+      var div = $('<div/>').html(template(snippet.toJSON()));
+      that.el.append(div);
+    });
   }
 });
