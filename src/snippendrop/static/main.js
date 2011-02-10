@@ -41,7 +41,7 @@ App.Collection.Projects = Backbone.Collection.extend({
 });
 
 App.Collection.Snippets = Backbone.Collection.extend({
-  model: App.Model.Project,
+  model: App.Model.Snippet,
   initialize: function(options) {
     this.project = options.project;
   },
@@ -98,16 +98,60 @@ App.View.ProjectList = Backbone.View.extend({
   }
 });
 
-App.View.SnippetEditor = Backbone.View.extend({
+App.View.SnippetView = Backbone.View.extend({
+  tagName: 'div',
+  className: 'snippet',
   initialize: function(options) {
-    this.el = options.el;
-    this.project = options.project;
-    this.snippets = this.project.snippets();
+    this.snippet = options.snippet;
 
     this.templates = {
       text: _.template($('.snippet-template.text').html()),
       header: _.template($('.snippet-template.text').html()),
     };
+
+    _.bindAll(this, 'render', 'editSnippet', 'viewSnippet');
+    this.render();
+  },
+  events: {
+    'click .viewer': 'editSnippet',
+    'blur .editor': 'viewSnippet'
+  },
+  render: function() {
+    var container = $(this.el), snippet = this.snippet;
+    container.empty();
+
+    var kind = snippet.get('kind');
+    var template = this.templates[kind];
+    var viewer = $('<div/>').html(template(snippet.toJSON()));
+    viewer.addClass('viewer').appendTo(container);
+
+    var editor = $('<textarea/>');
+    editor.addClass('editor').hide().appendTo(container);
+  },
+  editSnippet: function() {
+    var snippet = this.snippet;
+    console.log('editing snippet', snippet.id);
+    this.$('.viewer').hide();
+    this.$('.editor').val(snippet.get('content')).show().focus();
+  },
+  viewSnippet: function() {
+    var snippet = this.snippet;
+    console.log('viewing snippet', snippet.id);
+    snippet.save({content: this.$('.editor').val()});
+    this.$('.editor').hide();
+
+    var kind = snippet.get('kind');
+    var template = this.templates[kind];
+    this.$('.viewer').html(template(snippet.toJSON())).show();
+  }
+});
+
+App.View.SnippetEditor = Backbone.View.extend({
+  initialize: function(options) {
+    this.el = options.el;
+    this.project = options.project;
+    this.snippets = this.project.snippets();
+    window.ss = this.snippets; // XXX
 
     _.bindAll(this, 'render');
     this.render();
@@ -116,10 +160,8 @@ App.View.SnippetEditor = Backbone.View.extend({
     var that = this;
     this.el.empty();
     this.snippets.each(function(snippet) {
-      var kind = snippet.get('kind');
-      var template = that.templates[kind];
-      var div = $('<div/>').html(template(snippet.toJSON()));
-      that.el.append(div);
+      var view = new App.View.SnippetView({snippet: snippet});
+      that.el.append(view.el);
     });
   }
 });
