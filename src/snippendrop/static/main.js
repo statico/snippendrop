@@ -172,7 +172,6 @@ App.View.SnippetEditor = Backbone.View.extend({
     this.el = options.el;
     this.project = options.project;
     this.snippets = this.project.snippets();
-    window.ss = this.snippets; // XXX
 
     _.bindAll(this, 'render');
     this.render();
