@@ -2,7 +2,7 @@ from flask import request, abort, g
 from werkzeug import MultiDict
 
 from snippendrop.application import app
-from snippendrop.models import Project, Snippet, db
+from snippendrop.models import Project, Snippet
 from snippendrop.forms import ProjectForm
 from snippendrop.decorators import rest
 

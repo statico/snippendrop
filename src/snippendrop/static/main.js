@@ -15,7 +15,15 @@ App.Model.Project = Backbone.Model.extend({
 
 App.Collection.Projects = Backbone.Collection.extend({
   model: App.Model.Project,
-  url: '/json/projects/'
+  url: '/json/projects'
+});
+
+/*
+App.View.ProjectList = Backbone.View.extend({
+  tagName: 'ul',
+  initialize: function(options) {
+    this.projects = options.projects;
+  });
 });
 
 /*
