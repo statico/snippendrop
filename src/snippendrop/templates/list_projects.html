@@ -12,11 +12,11 @@
 
   <h2>Create a new project:</h2>
 
-  <p>
+  <form><p>
     {{ form.title.label }}:
     {{ form.title() }}
     <button class="new-project">New project</button>
-  </p>
+  </p></form>
 
   </div>
 
@@ -25,9 +25,25 @@
     $(function() {
       var projects = new App.Collection.Projects();
       new App.View.ProjectList({el: $('#list'), projects: projects});
+
       {% for obj in projects %}
-        projects.add({{ obj.to_dict()|tojson|safe }});
-      {% endfor %}
+      projects.add({{ obj.to_dict()|tojson|safe }});
+      {%- endfor %}
+
+      $('form').submit(function() {
+        var title = $('input[name=title]').val();
+        if (title == '') {
+          alert("Please enter a project title.");
+          return;
+        }
+
+        if (projects.create({title: title})) {
+          $('input').val('');
+        } else {
+          alert("An error occurred.");
+        }
+        return false;
+      });
     });
   </script>
 
