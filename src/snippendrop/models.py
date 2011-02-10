@@ -18,6 +18,20 @@ def add_current_user_to_session():
             app.logger.warn('Session username was "%s" but no user found', username)
 
 
+class _CRUDMixin(object):
+
+    def put(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def save(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
 class User(db.Model):
     __tablename__ = 'users'
 
@@ -44,7 +58,7 @@ class User(db.Model):
             return False
 
 
-class Project(db.Model):
+class Project(db.Model, _CRUDMixin):
     __tablename__ = 'projects'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -59,23 +73,12 @@ class Project(db.Model):
             obj[attr] = getattr(self, attr)
         return obj
 
-    def put(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def save(self):
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-
     @classmethod
     def get_by_id_and_owner(cls, id, owner):
         return cls.query.filter(cls.id==id).filter(cls.owner_id==owner.id).first()
 
 
-class Snippet(db.Model):
+class Snippet(db.Model, _CRUDMixin):
     __tablename__ = 'snippets'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -88,6 +91,10 @@ class Snippet(db.Model):
 
     def to_dict(self):
         obj = {}
-        for attr in ('id', 'project_id', 'title', 'is_header', 'content'):
+        for attr in ('id', 'project_id', 'kind', 'title', 'content'):
             obj[attr] = getattr(self, attr)
         return obj
+
+    @classmethod
+    def get_by_id_and_project(cls, id, project):
+        return cls.query.filter(cls.id==id).filter(cls.project_id==project.id).first()

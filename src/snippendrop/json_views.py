@@ -3,7 +3,7 @@ from werkzeug import MultiDict
 
 from snippendrop.application import app
 from snippendrop.models import Project, Snippet
-from snippendrop.forms import ProjectForm
+from snippendrop.forms import ProjectForm, SnippetForm
 from snippendrop.decorators import jsonify, catch_assertions
 
 # TODO: Encrypt IDs, see PyCrypto
@@ -67,25 +67,52 @@ def projects(id=None):
 @catch_assertions
 @jsonify
 def snippets(pid=None, sid=None):
-    assert pid, 'pid required'
     user = g.user
 
-    if request.method == 'GET':
-        assert id
-        obj = Snippet.get_by_id_and_user(id, user)
-        if obj:
-            return obj.to_dict()
+    assert pid, 'pid required'
+    # TODO: Optimize SQL to remove extra extra query.
+    project = Project.get_by_id_and_owner(pid, user)
+    assert project, 'project required'
+
+    if request.method == 'GET': # Fetch
+        if sid:
+            obj = Snippet.get_by_id_and_project(sid, project)
+            if obj:
+                return obj.to_dict()
+            else:
+                logger.debug('No snippet for id %s and user %s', sid, user)
+                abort(404)
         else:
-            logger.debug('No snippet for key %s and user %s', id, user)
-            abort(404)
+            return [o.to_dict() for o in project.snippets]
 
     elif request.method == 'POST': # Create
         data = MultiDict(request.json)
-        assert not id, 'No id allowed'
-        project = Project.get_by_id_and_user(data.get('project'), user)
-        assert project, 'Valid project required'
-        obj = Snippet(project=project,
-                      is_header=False,
-                      content='Lorem ipsum',
-                      ).put()
-        return obj.to_dict()
+        assert not sid, 'No snippet id allowed'
+        form = SnippetForm(data)
+        if form.validate():
+            obj = Snippet(project_id=pid)
+            form.populate_obj(obj)
+            obj.put()
+            return obj.to_dict()
+        else:
+            logger.warn('Snippet create errors: %s', form.errors)
+            abort(400)
+
+    elif request.method == 'PUT': # Update
+        data = MultiDict(request.json)
+        obj = Snippet.get_by_id_and_project(sid, project)
+        if not obj: abort(404)
+        form = SnippetForm(data, obj)
+        if form.validate():
+            form.populate_obj(obj)
+            obj.save()
+            return obj.to_dict()
+        else:
+            logger.warn('Snippet update errors: %s', form.errors)
+            abort(400)
+
+    elif request.method == 'DELETE': # Delete
+        obj = Snippet.get_by_id_and_project(sid, project)
+        if not obj: abort(404)
+        obj.delete()
+        return {'success': True}
