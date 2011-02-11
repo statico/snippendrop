@@ -4,6 +4,8 @@
 
   <h1>{{ project.title }}</h1>
 
+  <p><button class="new">New snippet</button></p>
+
   <div id="snippet-editor"></div>
 
   <script type="text/javascript">
@@ -13,10 +15,11 @@
       snippets.fetch({
         // TODO: Make inline.
         success: function(snippets, response) {
-          new App.View.SnippetEditor({
+          var editor = new App.View.SnippetEditor({
             el: $('#snippet-editor'),
             project: project
           });
+          $('button.new').click(editor.createSnippet);
         },
         error: function(snippets, response) {
           alert('There was an error while loading the project.');

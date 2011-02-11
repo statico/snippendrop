@@ -14,6 +14,10 @@ textarea {
     font-size: 100%;
 }
 
+#snippet-editor {
+    height: 60%;
+}
+
 .snippet {
     background: #fff;
     border: 1px solid #C5C5C5;

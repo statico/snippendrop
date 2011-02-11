@@ -103,6 +103,12 @@ App.View.SnippetView = Backbone.View.extend({
   className: 'snippet',
   initialize: function(options) {
     this.snippet = options.snippet;
+    this.snippet.view = this;
+
+    $(this.el).data({
+      view: this,
+      snippet: this.snippet
+    });
 
     this.templates = {
       text: _.template($('.snippet-template.text').html()),
@@ -126,7 +132,6 @@ App.View.SnippetView = Backbone.View.extend({
       .drag('end', function() {
         $(this).css('opacity', 1);
       });
-
   },
   events: {
     'click .viewer': 'editSnippet',
@@ -173,8 +178,14 @@ App.View.SnippetEditor = Backbone.View.extend({
     this.project = options.project;
     this.snippets = this.project.snippets();
 
-    _.bindAll(this, 'render');
+    _.bindAll(this, 'render', 'createSnippet', 'snippetAdded');
+    this.snippets.bind('add', this.render);
     this.render();
+
+    $(this.el).data({
+      view: this,
+      snippets: this.snippets
+    });
   },
   render: function() {
     var that = this;
@@ -183,5 +194,13 @@ App.View.SnippetEditor = Backbone.View.extend({
       var view = new App.View.SnippetView({snippet: snippet});
       that.el.append(view.el);
     });
+  },
+  createSnippet: function() {
+    var snippet = this.snippets.create({project_id: this.project.id});
+    //snippet.view.editSnippet();
+  },
+  snippetAdded: function(snippet) {
+    var view = App.View.SnippetView({snippet: snippet});
+    this.el.append(view.el);
   }
 });
