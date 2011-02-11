@@ -197,6 +197,7 @@ App.View.ProjectEditor = Backbone.View.extend({
     _.bindAll(this, 'render', 'createSnippet');
     this.snippets.bind('add', this.render);
     this.snippets.bind('remove', this.render);
+    this.snippets.bind('change', this.render);
     this.render();
 
     $(this.el).empty().data({
