@@ -41,6 +41,13 @@ textarea {
     display: block;
     -webkit-box-shadow: 0 0 0 #fff;
 }
+.snippet .editor:focus {
+    outline: none;
+}
+.snippet.dragging {
+    opacity: 0.5;
+    -webkit-opacity: 0.5;
+}
 
 .close-icon {
     width: 16px;
@@ -51,4 +58,8 @@ textarea {
 
 .error {
     color: red;
+}
+
+.snippet.drop-target {
+    outline: 5px solid green;
 }

@@ -1,3 +1,5 @@
+/* Copyright 2011 Ian Langworth. All rights reserved. */
+
 var App = {
   Model: {},
   Collection: {},
@@ -118,9 +120,10 @@ App.View.SnippetView = Backbone.View.extend({
     _.bindAll(this, 'render', 'editSnippet', 'viewSnippet');
     this.render();
 
+    // Mysterious drag-and-drop voodoo, part 1.
     $(this.el)
       .drag('start', function() {
-        $(this).css('opacity', 0.4);
+        $(this).addClass('dragging'); // Style the object as if it's being dragged.
       })
       .drag(function(event, dd) {
         $(this).css({
@@ -129,8 +132,15 @@ App.View.SnippetView = Backbone.View.extend({
           left: dd.offsetX
         });
       }, {click: false})
-      .drag('end', function() {
-        $(this).css('opacity', 1);
+      .drag('end', function(event, dd) {
+        $(this).removeClass('dragging'); // Remove style during drag.
+        if (!dd.drop.length) {
+          // No destination snippet? Move the object back to where it was.
+          $(this).animate({
+            top: dd.originalY,
+            left: dd.originalX
+          }, 420)
+        }
       });
   },
   events: {
@@ -151,7 +161,7 @@ App.View.SnippetView = Backbone.View.extend({
   },
   editSnippet: function(event) {
     var snippet = this.snippet;
-    if (event.altKey) {
+    if (event && event.altKey) {
       snippet.destroy();
       this.remove();
     } else {
@@ -191,6 +201,26 @@ App.View.SnippetEditor = Backbone.View.extend({
       view: this,
       snippets: this.snippets
     });
+
+    // Mysterious drag-and-drop voodoo, part 2.
+    $('.snippet .viewer')
+      .live('dropstart', function(event, dd) {
+        var el = $(this).parent(); // Live events only seem to work for subelements.
+        if (el.hasClass('dragging')) return; // Ignore drop events from the element being dragged.
+        el.addClass('drop-target'); // Highlight the destination snippet.
+      })
+      .live('drop', function(event, dd) {
+        if (!dd) return; // For some reason this event fires on load but `dd` is undefined.
+        var src = $(dd.drag);
+        var dest = $(this);
+        console.log(parseInt(src.text()), 'dragged onto', parseInt(dest.text()));
+      })
+      .live('dropend', function(event, dd) {
+        var el = $(this).parent();
+        if (el.hasClass('dragging')) return;
+        el.removeClass('drop-target');
+      })
+      .drop({mode: 'intersect'}); // Use a normal-feeling drag and drop mode.
   },
   render: function() {
     var that = this;
@@ -201,8 +231,7 @@ App.View.SnippetEditor = Backbone.View.extend({
     });
   },
   createSnippet: function() {
-    var snippet = this.snippets.create({project_id: this.project.id});
-    //snippet.view.editSnippet();
+    this.snippets.create({project_id: this.project.id});
   },
   snippetAdded: function(snippet) {
     var view = App.View.SnippetView({snippet: snippet});
