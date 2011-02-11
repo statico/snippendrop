@@ -15,11 +15,12 @@
       snippets.fetch({
         // TODO: Make inline.
         success: function(snippets, response) {
-          var editor = new App.View.SnippetEditor({
+          var editor = new App.View.ProjectEditor({
             el: $('#snippet-editor'),
             project: project
           });
           $('button.new').click(editor.createSnippet);
+          // TODO: $(window).resize(editor.render);
         },
         error: function(snippets, response) {
           alert('There was an error while loading the project.');

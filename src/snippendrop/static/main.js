@@ -187,17 +187,19 @@ App.View.SnippetView = Backbone.View.extend({
   }
 });
 
-App.View.SnippetEditor = Backbone.View.extend({
+App.View.ProjectEditor = Backbone.View.extend({
   initialize: function(options) {
     this.el = options.el;
     this.project = options.project;
     this.snippets = this.project.snippets();
+    this.columns = 4;
 
-    _.bindAll(this, 'render', 'createSnippet', 'snippetAdded');
+    _.bindAll(this, 'render', 'createSnippet');
     this.snippets.bind('add', this.render);
+    this.snippets.bind('remove', this.render);
     this.render();
 
-    $(this.el).data({
+    $(this.el).empty().data({
       view: this,
       snippets: this.snippets
     });
@@ -213,7 +215,7 @@ App.View.SnippetEditor = Backbone.View.extend({
         if (!dd) return; // For some reason this event fires on load but `dd` is undefined.
         var src = $(dd.drag);
         var dest = $(this);
-        console.log(parseInt(src.text()), 'dragged onto', parseInt(dest.text()));
+        //console.log(parseInt(src.text()), 'dragged onto', parseInt(dest.text()));
       })
       .live('dropend', function(event, dd) {
         var el = $(this).parent();
@@ -223,18 +225,66 @@ App.View.SnippetEditor = Backbone.View.extend({
       .drop({mode: 'intersect'}); // Use a normal-feeling drag and drop mode.
   },
   render: function() {
-    var that = this;
-    this.el.empty();
+    var that = this, container = $(this.el), offset = container.offset();
+    //console.log('------------ RENDERING PROJECT EDITOR -----------');
+
+    // Size the container.
+    var gap = offset.left;
+    container.css({
+      position: 'absolute',
+      left: offset.left,
+      top: offset.top,
+      right: gap,
+      height: $(window).height() - offset.top - gap
+    });
+
+    // Determine column width.
+    var colWidth = Math.min(250, container.width() / this.columns);
+    var colIndex = 0;
+
+    // For each snippet,
+    var previous = null;
     this.snippets.each(function(snippet) {
-      var view = new App.View.SnippetView({snippet: snippet});
-      that.el.append(view.el);
+
+      // Determine height.
+      var view = snippet.view || new App.View.SnippetView({snippet: snippet});
+      var el = $(view.el).appendTo(container);
+      el.css({
+        position: 'absolute',
+        top: -10000,
+        left: -10000,
+        width: colWidth
+      });
+      //console.log('Dimensions for snippet', snippet.id, 'are', el.width(), 'x', el.height());
+
+      // If won't fit into current column, start a new column.
+      if (previous) {
+        var top = previous.offset().top + previous.height() + gap;
+        var floor = container.offset().top + container.height();
+        //console.log('Top of previous is', top);
+        if (el.height() > (floor - top)) {
+          //console.log('Snippet height is', el.height(), 'but avail space is', floor - top);
+          previous = null;
+          colIndex++;
+        }
+      }
+
+      // Add it to the current column.
+      var top = (previous
+                 ? previous.offset().top + previous.height() + gap
+                 : container.offset().top);
+      var left = colWidth * colIndex + gap * (colIndex + 1);
+      //console.log('Placing at', top, 'x', left);
+      el.appendTo('body');
+      el.css({
+        top: top,
+        left: left
+      });
+
+      previous = el;
     });
   },
   createSnippet: function() {
     this.snippets.create({project_id: this.project.id});
   },
-  snippetAdded: function(snippet) {
-    var view = App.View.SnippetView({snippet: snippet});
-    this.el.append(view.el);
-  }
 });
