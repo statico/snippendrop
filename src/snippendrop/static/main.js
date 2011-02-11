@@ -149,16 +149,21 @@ App.View.SnippetView = Backbone.View.extend({
     var editor = $('<textarea/>');
     editor.addClass('editor').hide().appendTo(container);
   },
-  editSnippet: function() {
+  editSnippet: function(event) {
     var snippet = this.snippet;
-    var editor = this.$('.editor'), viewer = this.$('.viewer');
-    editor
-      .val(snippet.get('content'))
-      .width(viewer.width() + 'px')
-      .height(viewer.height() + 'px')
-      .show()
-      .focus();
-    viewer.hide();
+    if (event.altKey) {
+      snippet.destroy();
+      this.remove();
+    } else {
+      var editor = this.$('.editor'), viewer = this.$('.viewer');
+      editor
+        .val(snippet.get('content'))
+        .width(viewer.width() + 'px')
+        .height(viewer.height() + 'px')
+        .show()
+        .focus();
+      viewer.hide();
+    }
   },
   viewSnippet: function() {
     var snippet = this.snippet;
