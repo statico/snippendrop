@@ -1,5 +1,12 @@
 /* Copyright 2011 Ian Langworth. All rights reserved. */
 
+function XXX(obj) {
+  if ('toJSON' in obj)
+    return JSON.stringify(obj.toJSON());
+  else
+    return JSON.stringify(obj);
+}
+
 var App = {
   Model: {},
   Collection: {},
@@ -49,6 +56,9 @@ App.Collection.Snippets = Backbone.Collection.extend({
   },
   url: function() {
     return '/json/projects/' + this.project.id + '/snippets';
+  },
+  comparator: function(snippet) {
+    return snippet.get('rank');
   }
 });
 
@@ -205,6 +215,8 @@ App.View.ProjectEditor = Backbone.View.extend({
       snippets: this.snippets
     });
 
+    var that = this;
+
     // Mysterious drag-and-drop voodoo, part 2.
     $('.snippet .viewer')
       .live('dropstart', function(event, dd) {
@@ -214,9 +226,29 @@ App.View.ProjectEditor = Backbone.View.extend({
       })
       .live('drop', function(event, dd) {
         if (!dd) return; // For some reason this event fires on load but `dd` is undefined.
+
         var src = $(dd.drag);
-        var dest = $(this);
-        //console.log(parseInt(src.text()), 'dragged onto', parseInt(dest.text()));
+        var dest = $(this).parent('.snippet');
+
+        var destSnippet = dest.data('snippet');
+        var destIndex = that.snippets.indexOf(destSnippet);
+        console.log('destIndex=', destIndex);
+
+        var srcSnippet = src.data('snippet');
+        var newIndex = destIndex;
+
+        that.snippets.each(function(snippet, i) {
+          if (i >= destIndex) {
+            newIndex++;
+            snippet.set({rank: newIndex}, {silent: true});
+            console.log(i, XXX(snippet));
+          }
+        });
+        srcSnippet.set({rank: destIndex}, {silent: true});
+        console.log('src', XXX(srcSnippet));
+
+        that.snippets.sort();
+        that.render();
       })
       .live('dropend', function(event, dd) {
         var el = $(this).parent();
