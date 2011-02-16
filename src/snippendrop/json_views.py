@@ -134,8 +134,11 @@ def reorder_snippets(pid=None):
 
     assert isinstance(request.json, list), 'data must be a list'
     for spec in request.json:
-        snippet = snippets.get(int(spec.get('id')))
-        snippet.rank = int(spec.get('rank'))
+        try:
+            snippet = snippets.get(int(spec.get('id')))
+            snippet.rank = int(spec.get('rank'))
+        except ValueError:
+            raise AssertionError('id and rank must be ints')
 
     commit()
     return {'success': True}
