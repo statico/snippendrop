@@ -149,7 +149,7 @@ App.View.SnippetView = Backbone.View.extend({
           $(this).animate({
             top: dd.originalY,
             left: dd.originalX
-          }, 420)
+          }, 200)
         }
       });
   },
@@ -230,22 +230,20 @@ App.View.ProjectEditor = Backbone.View.extend({
         var src = $(dd.drag);
         var dest = $(this).parent('.snippet');
 
+        var srcSnippet = src.data('snippet');
+        var srcIndex = that.snippets.indexOf(srcSnippet);
+
         var destSnippet = dest.data('snippet');
         var destIndex = that.snippets.indexOf(destSnippet);
-        console.log('destIndex=', destIndex);
 
-        var srcSnippet = src.data('snippet');
-        var newIndex = destIndex;
+        var items = that.snippets.toArray();
+        items.splice(srcIndex, 1);
+        items.splice(destIndex, 0, srcSnippet);
 
-        that.snippets.each(function(snippet, i) {
-          if (i >= destIndex) {
-            newIndex++;
-            snippet.set({rank: newIndex}, {silent: true});
-            console.log(i, XXX(snippet));
-          }
+        _.each(items, function(snippet, i) {
+          snippet.set({rank: i}, {silent: true});
+          snippet.save();
         });
-        srcSnippet.set({rank: destIndex}, {silent: true});
-        console.log('src', XXX(srcSnippet));
 
         that.snippets.sort();
         that.render();
@@ -259,7 +257,7 @@ App.View.ProjectEditor = Backbone.View.extend({
   },
   render: function() {
     var that = this, container = $(this.el), offset = container.offset();
-    //console.log('------------ RENDERING PROJECT EDITOR -----------');
+    console.log('------------ RENDERING PROJECT EDITOR -----------');
 
     // Size the container.
     var gap = offset.left;
