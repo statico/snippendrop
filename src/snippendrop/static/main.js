@@ -7,6 +7,11 @@ function XXX(obj) {
     return JSON.stringify(obj);
 }
 
+function markdown(text) {
+   var converter = new Showdown.converter();
+  return converter.makeHtml(text);
+}
+
 var App = {
   Model: {},
   Collection: {},
@@ -41,6 +46,14 @@ App.Model.Snippet = Backbone.Model.extend({
   url: function() {
     var base = this.urlBase;
     return this.id ? base + '/' + this.id : base;
+  },
+  renderedContent: function() {
+    return markdown(this.get('content'));
+  },
+  toContext: function() {
+    var context = this.toJSON();
+    context.renderedContent = this.renderedContent();
+    return context;
   }
 });
 
@@ -185,7 +198,7 @@ App.View.SnippetView = Backbone.View.extend({
 
     var kind = snippet.get('kind');
     var template = this.templates[kind];
-    var viewer = $('<div/>').html(template(snippet.toJSON()));
+    var viewer = $('<div/>').html(template(snippet.toContext()));
     viewer.addClass('viewer').appendTo(container);
 
     var editor = $('<textarea/>');
@@ -210,12 +223,15 @@ App.View.SnippetView = Backbone.View.extend({
   viewSnippet: function() {
     var snippet = this.snippet;
     var editor = this.$('.editor'), viewer = this.$('.viewer');
-    snippet.save({content: editor.val()});
-    editor.hide();
-
-    var kind = snippet.get('kind');
-    var template = this.templates[kind];
-    viewer.html(template(snippet.toJSON())).show();
+    var that = this;
+    snippet.save(
+      {content: editor.val()},
+      {success: function() {
+        editor.hide();
+        var kind = snippet.get('kind');
+        var template = that.templates[kind];
+        viewer.html(template(snippet.toContext())).show();
+      }});
   }
 });
 

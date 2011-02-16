@@ -2,6 +2,8 @@
 
 body {
     font-family: sans-serif;
+    font-size: 100%;
+    zoom: 1;
     background: #ccc url('bg.png');
 }
 
@@ -10,8 +12,15 @@ h1 {
     text-shadow: #fff 0px 1px 0px;
 }
 
+p {
+    margin: 0;
+    padding: 0;
+}
+
 textarea {
+    font-family: sans-serif;
     font-size: 100%;
+    overflow: hidden;
 }
 
 #snippet-editor {
