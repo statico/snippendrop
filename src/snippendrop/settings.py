@@ -9,3 +9,4 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/snippendrop.db'
+    #SQLALCHEMY_ECHO = True

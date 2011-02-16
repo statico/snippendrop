@@ -17,6 +17,8 @@ def add_current_user_to_session():
         except NoResultFound:
             app.logger.warn('Session username was "%s" but no user found', username)
 
+def commit():
+    db.session.commit()
 
 class _CRUDMixin(object):
 
@@ -80,12 +82,6 @@ class Project(db.Model, _CRUDMixin):
 
 class Snippet(db.Model, _CRUDMixin):
     __tablename__ = 'snippets'
-
-    # TODO: Uncomment when snippet ordering occurs in a single transaction.
-    # __table_args__ = (
-    #     db.UniqueConstraint('project_id', 'rank'),
-    #     {}
-    #     )
 
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))

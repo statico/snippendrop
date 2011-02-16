@@ -2,7 +2,7 @@ from flask import request, abort, g
 from werkzeug import MultiDict
 
 from snippendrop.application import app
-from snippendrop.models import Project, Snippet
+from snippendrop.models import Project, Snippet, commit
 from snippendrop.forms import ProjectForm, SnippetForm
 from snippendrop.decorators import login_required, jsonify, catch_assertions
 
@@ -119,3 +119,23 @@ def snippets(pid=None, sid=None):
         if not obj: abort(404)
         obj.delete()
         return {'success': True}
+
+@app.route('/json/projects/<int:pid>/reorder', methods=['PUT'])
+@login_required
+@catch_assertions
+@jsonify
+def reorder_snippets(pid=None):
+    user = g.user
+    assert pid, 'pid required'
+    project = Project.get_by_id_and_owner(pid, user)
+    assert project, 'project required'
+
+    snippets = dict((s.id, s) for s in project.snippets)
+
+    assert isinstance(request.json, list), 'data must be a list'
+    for spec in request.json:
+        snippet = snippets.get(int(spec.get('id')))
+        snippet.rank = int(spec.get('rank'))
+
+    commit()
+    return {'success': True}

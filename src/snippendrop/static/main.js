@@ -59,6 +59,28 @@ App.Collection.Snippets = Backbone.Collection.extend({
   },
   comparator: function(snippet) {
     return snippet.get('rank');
+  },
+  saveRanks: function(success, error) {
+    var data = [];
+    this.each(function(snippet) {
+      data.push({
+        id: snippet.id,
+        rank: snippet.get('rank')
+      });
+    });
+
+    $.ajax({
+      url: '/json/projects/' + this.project.id + '/reorder',
+      type: 'PUT',
+      contentType: 'application/json',
+      data: JSON.stringify(data),
+      dataType: 'json',
+      processData: false,
+      success: success,
+      error: error
+    });
+
+    return this;
   }
 });
 
@@ -227,25 +249,24 @@ App.View.ProjectEditor = Backbone.View.extend({
       .live('drop', function(event, dd) {
         if (!dd) return; // For some reason this event fires on load but `dd` is undefined.
 
+        // Get the object dragged (src) and drop target (dest).
         var src = $(dd.drag);
         var dest = $(this).parent('.snippet');
 
+        // Instead of relying on rank, simply put all of the snippets
+        // in an array and use the array's index properties. This way
+        // all of the ranks stay nice an neat.
         var srcSnippet = src.data('snippet');
         var srcIndex = that.snippets.indexOf(srcSnippet);
-
         var destSnippet = dest.data('snippet');
         var destIndex = that.snippets.indexOf(destSnippet);
-
         var items = that.snippets.toArray();
         items.splice(srcIndex, 1);
         items.splice(destIndex, 0, srcSnippet);
-
         _.each(items, function(snippet, i) {
           snippet.set({rank: i}, {silent: true});
-          snippet.save();
         });
-
-        that.snippets.sort();
+        that.snippets.saveRanks().sort();
         that.render();
       })
       .live('dropend', function(event, dd) {
