@@ -7,16 +7,14 @@ from snippendrop.application import app
 
 logger = app.logger
 
-def login_required():
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if g.user:
-                return f(*args, **kwargs)
-            else:
-                return redirect(url_for('welcome'))
-        return decorated_function
-    return decorator
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if g.user:
+            return f(*args, **kwargs)
+        else:
+            return redirect(url_for('welcome'))
+    return decorated_function
 
 def templated(template=None):
     def decorator(f):

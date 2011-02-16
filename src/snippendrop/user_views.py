@@ -27,7 +27,7 @@ def logout():
     return redirect(url_for('welcome'))
 
 @app.route('/projects/')
-@login_required()
+@login_required
 @templated('list_projects.html')
 def list_projects():
     user = g.user
@@ -36,7 +36,7 @@ def list_projects():
         form=ProjectForm())
 
 @app.route('/project/<int:id>/')
-@login_required()
+@login_required
 @templated('edit_project.html')
 def edit_project(id):
     user = g.user

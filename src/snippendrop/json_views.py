@@ -4,7 +4,7 @@ from werkzeug import MultiDict
 from snippendrop.application import app
 from snippendrop.models import Project, Snippet
 from snippendrop.forms import ProjectForm, SnippetForm
-from snippendrop.decorators import jsonify, catch_assertions
+from snippendrop.decorators import login_required, jsonify, catch_assertions
 
 # TODO: Encrypt IDs, see PyCrypto
 # TODO: Caching
@@ -13,6 +13,7 @@ logger = app.logger
 
 @app.route('/json/projects', methods=['GET', 'POST'])
 @app.route('/json/projects/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+@login_required
 @catch_assertions
 @jsonify
 def projects(id=None):
@@ -64,6 +65,7 @@ def projects(id=None):
 
 @app.route('/json/projects/<int:pid>/snippets', methods=['GET', 'POST'])
 @app.route('/json/projects/<int:pid>/snippets/<int:sid>', methods=['GET', 'PUT', 'DELETE'])
+@login_required
 @catch_assertions
 @jsonify
 def snippets(pid=None, sid=None):
