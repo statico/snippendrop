@@ -41,6 +41,5 @@ def list_projects():
 def edit_project(id):
     user = g.user
     project = Project.get_by_id_and_owner(id, user)
-    logger.debug('No project found for user %s and id %s', user, id)
     if not project: abort(404)
     return dict(project=project)

@@ -81,8 +81,15 @@ class Project(db.Model, _CRUDMixin):
 class Snippet(db.Model, _CRUDMixin):
     __tablename__ = 'snippets'
 
+    # TODO: Uncomment when snippet ordering occurs in a single transaction.
+    # __table_args__ = (
+    #     db.UniqueConstraint('project_id', 'rank'),
+    #     {}
+    #     )
+
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'))
+    rank = db.Column(db.Integer())
     kind = db.Column(db.Enum('text', 'header', nullable=False))
     title = db.Column(db.String(255))
     content = db.Column(db.Text())
@@ -91,10 +98,18 @@ class Snippet(db.Model, _CRUDMixin):
 
     def to_dict(self):
         obj = {}
-        for attr in ('id', 'project_id', 'kind', 'title', 'content'):
+        for attr in ('id', 'project_id', 'rank', 'kind', 'title', 'content'):
             obj[attr] = getattr(self, attr)
         return obj
 
     @classmethod
     def get_by_id_and_project(cls, id, project):
         return cls.query.filter(cls.id==id).filter(cls.project_id==project.id).first()
+
+    @classmethod
+    def get_next_rank(cls, pid):
+        current = db.session.query(db.func.max(cls.rank)).filter(cls.project_id==pid).first()[0]
+        if current is None:
+            return 0
+        else:
+            return current + 1

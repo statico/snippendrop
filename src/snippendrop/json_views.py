@@ -92,6 +92,7 @@ def snippets(pid=None, sid=None):
         if form.validate():
             obj = Snippet(project_id=pid)
             form.populate_obj(obj)
+            obj.rank = Snippet.get_next_rank(pid)
             obj.put()
             return obj.to_dict()
         else:

@@ -11,6 +11,7 @@ class ProjectForm(Form):
     title = TextField('Project title', [Length(min=1, max=500)])
 
 class SnippetForm(Form):
+    rank = IntegerField()
     kind = TextField()
     title = TextField()
     content = TextField()
