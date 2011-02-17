@@ -8,7 +8,8 @@ function XXX(obj) {
 }
 
 function markdown(text) {
-   var converter = new Showdown.converter();
+  text = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  var converter = new Showdown.converter();
   return converter.makeHtml(text);
 }
 
