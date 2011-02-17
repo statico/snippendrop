@@ -242,8 +242,9 @@ App.View.ProjectEditor = Backbone.View.extend({
     this.project = options.project;
     this.snippets = this.project.snippets();
     this.columns = 4;
+    this.resizeTimer = null;
 
-    _.bindAll(this, 'render', 'createSnippet');
+    _.bindAll(this, 'render', 'createSnippet', 'windowResized');
     this.snippets.bind('add', this.render);
     this.snippets.bind('remove', this.render);
     this.snippets.bind('change', this.render);
@@ -253,6 +254,9 @@ App.View.ProjectEditor = Backbone.View.extend({
       view: this,
       snippets: this.snippets
     });
+
+
+    $(window).resize(this.windowResized);
 
     var that = this;
 
@@ -295,7 +299,6 @@ App.View.ProjectEditor = Backbone.View.extend({
   },
   render: function() {
     var that = this, container = $(this.el), offset = container.offset();
-    console.log('------------ RENDERING PROJECT EDITOR -----------');
 
     // Size the container.
     var gap = offset.left;
@@ -324,15 +327,12 @@ App.View.ProjectEditor = Backbone.View.extend({
         left: -10000,
         width: colWidth
       });
-      //console.log('Dimensions for snippet', snippet.id, 'are', el.width(), 'x', el.height());
 
       // If won't fit into current column, start a new column.
       if (previous) {
         var top = previous.offset().top + previous.height() + gap;
         var floor = container.offset().top + container.height();
-        //console.log('Top of previous is', top);
         if (el.height() > (floor - top)) {
-          //console.log('Snippet height is', el.height(), 'but avail space is', floor - top);
           previous = null;
           colIndex++;
         }
@@ -343,7 +343,6 @@ App.View.ProjectEditor = Backbone.View.extend({
                  ? previous.offset().top + previous.height() + gap
                  : container.offset().top);
       var left = colWidth * colIndex + gap * (colIndex + 1);
-      //console.log('Placing at', top, 'x', left);
       el.appendTo('body');
       el.css({
         top: top,
@@ -356,4 +355,13 @@ App.View.ProjectEditor = Backbone.View.extend({
   createSnippet: function() {
     this.snippets.create({project_id: this.project.id});
   },
+  windowResized: function() {
+    if (this.resizeTimer) return;
+
+    var that = this;
+    this.resizeTimer = setTimeout(function() {
+      that.render();
+      that.resizeTimer = null;
+    }, 400);
+  }
 });
