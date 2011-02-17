@@ -265,14 +265,15 @@ App.View.SnippetView = Backbone.View.extend({
       }});
   },
   resizeEditor: function(event, forceResize) {
-    this.clone
+    var editor = this.editor, clone = this.clone;
+    clone
       .scrollTop(10000)
-      .width(this.editor.width())
-      .text(this.editor.val());
+      .width(editor.width())
+      .text(editor.val());
 
-    var newHeight = this.clone.height();
+    var newHeight = clone.height();
     if (forceResize || this.oldHeight != newHeight) {
-      this.editor.animate({height: newHeight}, 100);
+      editor.animate({height: newHeight}, 100);
       this.oldHeight = newHeight;
     }
   }
