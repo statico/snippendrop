@@ -163,7 +163,7 @@ App.View.SnippetView = Backbone.View.extend({
       header: _.template($('.snippet-template.text').html()),
     };
 
-    _.bindAll(this, 'render', 'editSnippet', 'viewSnippet');
+    _.bindAll(this, 'render', 'editSnippet', 'viewSnippet', 'resizeEditor');
     this.render();
 
     // Mysterious drag-and-drop voodoo, part 1.
@@ -199,27 +199,41 @@ App.View.SnippetView = Backbone.View.extend({
 
     var kind = snippet.get('kind');
     var template = this.templates[kind];
-    var viewer = $('<div/>').html(template(snippet.toContext()));
-    viewer
+    this.viewer = $('<div/>')
+      .html(template(snippet.toContext()))
       .addClass('viewer')
       .appendTo(container);
 
-    var editor = $('<textarea/>');
-    editor
+    this.clone = this.viewer.clone().appendTo('body').css({
+      position: 'absolute',
+      top: -9999,
+      left: -9999,
+      whiteSpace: 'pre-wrap'
+    });
+    this.oldHeight = null;
+
+    this.editor = $('<textarea/>')
       .addClass('editor')
-      .width(viewer.width())
-      .height(viewer.height())
-      .autoResize()
       .hide()
-      .appendTo(container);
+      .appendTo(container)
+      .keydown(this.resizeEditor)
+      .keyup(this.resizeEditor)
+      .change(this.resizeEditor);
   },
   editSnippet: function(event) {
     var snippet = this.snippet;
     if (event && event.altKey) {
-      snippet.destroy();
-      this.remove();
+      // Alt-click deletes snippets.
+      if (confirm("Really destroy this snippet?")) {
+        snippet.destroy();
+        this.remove();
+      }
     } else {
-      var editor = this.$('.editor'), viewer = this.$('.viewer');
+      var container = $(this.el);
+      this.oldZIndex = container.css('z-index');
+      container.css('z-index', 100);
+
+      var editor = this.editor, viewer = this.viewer;
       editor
         .val(snippet.get('content'))
         .width(viewer.width())
@@ -227,20 +241,39 @@ App.View.SnippetView = Backbone.View.extend({
         .show()
         .focus();
       viewer.hide();
+      this.resizeEditor(null, true);
     }
   },
   viewSnippet: function() {
     var snippet = this.snippet;
-    var editor = this.$('.editor'), viewer = this.$('.viewer');
+    var editor = this.editor, viewer = this.viewer;
+    var container = $(this.el);
+
+    // Strip trailing space which causes problems with resizeEditor.
+    editor.val(editor.val().replace(/\s+$/g, ''));
+
     var that = this;
     snippet.save(
       {content: editor.val()},
       {success: function() {
         editor.hide();
+        container.css('z-index', this.oldZIndex);
         var kind = snippet.get('kind');
         var template = that.templates[kind];
         viewer.html(template(snippet.toContext())).show();
       }});
+  },
+  resizeEditor: function(event, forceResize) {
+    this.clone
+      .scrollTop(10000)
+      .width(this.editor.width())
+      .text(this.editor.val());
+
+    var newHeight = this.clone.height();
+    if (forceResize || this.oldHeight != newHeight) {
+      this.editor.animate({height: newHeight}, 100);
+      this.oldHeight = newHeight;
+    }
   }
 });
 
