@@ -302,6 +302,31 @@ App.View.ProjectEditor = Backbone.View.extend({
 
     var that = this;
 
+    // Initialize the uploader.
+    function x(arg) {return function(){ console.log('file-upload', arg); return true; }}
+    $('#upload').fileUpload({
+      url: '/upload',
+      method: 'POST',
+      fieldName: 'file',
+      withCredentials: true,
+      dropZone: $('#snippet-editor'),
+      onDocumentDragEnter: x('onDocumentDragEnter'),
+      onDocumentDragLeave: x('onDocumentDragLeave'),
+      onDocumentDrop: x('onDocumentDrop'),
+      onDragEnter: x('onDragEnter'),
+      onDragLeave: x('onDragLeave'),
+      onDrop: x('onDrop'),
+      onChange: x('onChange'),
+      onLoad: x('onLoad'),
+      onProgress: x('onProgress'),
+      onAbort: x('onAbort'),
+      onError: x('onError'),
+      initUpload: function (event, files, index, xhr, handler, callBack) {
+        console.log('initUpload');
+        callBack();
+      },
+    });
+
     // Mysterious drag-and-drop voodoo, part 2.
     $('.snippet .viewer')
       .live('dropstart', function(event, dd) {
