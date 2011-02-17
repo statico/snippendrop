@@ -169,7 +169,8 @@ App.View.SnippetView = Backbone.View.extend({
     // Mysterious drag-and-drop voodoo, part 1.
     $(this.el)
       .drag('start', function() {
-        $(this).addClass('dragging'); // Style the object as if it's being dragged.
+        $(this).addClass('dragging'); // Style the object as if it's
+                                      // being dragged.
       })
       .drag(function(event, dd) {
         $(this).css({
@@ -303,12 +304,16 @@ App.View.ProjectEditor = Backbone.View.extend({
     // Mysterious drag-and-drop voodoo, part 2.
     $('.snippet .viewer')
       .live('dropstart', function(event, dd) {
-        var el = $(this).parent(); // Live events only seem to work for subelements.
-        if (el.hasClass('dragging')) return; // Ignore drop events from the element being dragged.
+        var el = $(this).parent(); // Live events only seem to work
+                                   // for subelements.
+        if (el.hasClass('dragging')) return; // Ignore drop events
+                                             // from the element being
+                                             // dragged.
         el.addClass('drop-target'); // Highlight the destination snippet.
       })
       .live('drop', function(event, dd) {
-        if (!dd) return; // For some reason this event fires on load but `dd` is undefined.
+        if (!dd) return; // For some reason this event fires on load
+                         // but `dd` is undefined.
 
         // Get the object dragged (src) and drop target (dest).
         var src = $(dd.drag);
