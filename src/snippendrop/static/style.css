@@ -73,5 +73,5 @@ textarea {
 }
 
 .snippet.drop-target {
-    outline: 5px solid green;
+    border-top: 5px solid #090;
 }
