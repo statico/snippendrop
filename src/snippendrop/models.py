@@ -34,7 +34,7 @@ class _CRUDMixin(object):
         db.session.commit()
 
 
-class User(db.Model):
+class User(db.Model, _CRUDMixin):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
