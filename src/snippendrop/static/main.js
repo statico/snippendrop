@@ -200,10 +200,18 @@ App.View.SnippetView = Backbone.View.extend({
     var kind = snippet.get('kind');
     var template = this.templates[kind];
     var viewer = $('<div/>').html(template(snippet.toContext()));
-    viewer.addClass('viewer').appendTo(container);
+    viewer
+      .addClass('viewer')
+      .appendTo(container);
 
     var editor = $('<textarea/>');
-    editor.addClass('editor').hide().appendTo(container);
+    editor
+      .addClass('editor')
+      .width(viewer.width())
+      .height(viewer.height())
+      .autoResize()
+      .hide()
+      .appendTo(container);
   },
   editSnippet: function(event) {
     var snippet = this.snippet;
@@ -214,8 +222,8 @@ App.View.SnippetView = Backbone.View.extend({
       var editor = this.$('.editor'), viewer = this.$('.viewer');
       editor
         .val(snippet.get('content'))
-        .width(viewer.width() + 'px')
-        .height(viewer.height() + 'px')
+        .width(viewer.width())
+        .height(viewer.height())
         .show()
         .focus();
       viewer.hide();
@@ -254,7 +262,6 @@ App.View.ProjectEditor = Backbone.View.extend({
       view: this,
       snippets: this.snippets
     });
-
 
     $(window).resize(this.windowResized);
 
@@ -323,8 +330,8 @@ App.View.ProjectEditor = Backbone.View.extend({
       var el = $(view.el).appendTo(container);
       el.css({
         position: 'absolute',
-        top: -10000,
-        left: -10000,
+        top: -9999,
+        left: -9999,
         width: colWidth
       });
 
