@@ -5,6 +5,10 @@
   <h1>
     {{ project.title }}
     <button class="new">New snippet</button>
+    <form id="upload" action="/upload" method="POST" enctype="multipart/form-data">
+      <input type="file" name="file" multiple="multiple"/>
+      <button>Upload</button>
+    </form>
   </h1>
 
   <div id="snippet-editor"></div>
