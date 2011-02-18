@@ -3,7 +3,7 @@ from flask import request, redirect, flash, session, url_for, g, abort
 from snippendrop.application import app
 from snippendrop.forms import LoginForm, LogoutForm, ProjectForm
 from snippendrop.models import User, Project
-from snippendrop.decorators import templated, login_required
+from snippendrop.decorators import templated, login_required, jsonify
 
 logger = app.logger
 
@@ -43,3 +43,12 @@ def edit_project(id):
     project = Project.get_by_id_and_owner(id, user)
     if not project: abort(404)
     return dict(project=project)
+
+@app.route('/upload/<int:id>/', methods=['POST'])
+@login_required
+@jsonify
+def upload(id):
+    user = g.user
+    project = Project.get_by_id_and_owner(id, user)
+    if not project: abort(404)
+    return {'success': True}

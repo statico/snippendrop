@@ -286,6 +286,7 @@ App.View.ProjectEditor = Backbone.View.extend({
     this.snippets = this.project.snippets();
     this.columns = 4;
     this.resizeTimer = null;
+    this.overlayTimer = null;
 
     _.bindAll(this, 'render', 'createSnippet', 'windowResized');
     this.snippets.bind('add', this.render);
@@ -303,27 +304,49 @@ App.View.ProjectEditor = Backbone.View.extend({
     var that = this;
 
     // Initialize the uploader.
-    function x(arg) {return function(){ console.log('file-upload', arg); return true; }}
-    $('#upload').fileUpload({
-      url: '/upload',
-      method: 'POST',
-      fieldName: 'file',
-      withCredentials: true,
-      dropZone: $('#snippet-editor'),
-      onDocumentDragEnter: x('onDocumentDragEnter'),
-      onDocumentDragLeave: x('onDocumentDragLeave'),
-      onDocumentDrop: x('onDocumentDrop'),
-      onDragEnter: x('onDragEnter'),
-      onDragLeave: x('onDragLeave'),
-      onDrop: x('onDrop'),
-      onChange: x('onChange'),
-      onLoad: x('onLoad'),
-      onProgress: x('onProgress'),
-      onAbort: x('onAbort'),
-      onError: x('onError'),
-      initUpload: function (event, files, index, xhr, handler, callBack) {
-        console.log('initUpload');
-        callBack();
+    var overlay = $('<div>Upload</div>').css({
+      position: 'fixed',
+      display: 'none',
+      top: 0,
+      left: 0,
+      height: '100%',
+      width: '100%',
+      background: '#000',
+      opacity: 0.7,
+      zIndex: 100,
+      color: '#fff',
+      textAlign: 'center',
+      paddingTop: '30%'
+    }).appendTo('body');
+
+    $('#file_upload').fileUpload({
+      onDocumentDragOver: function() {
+        overlay.fadeIn();
+        clearTimeout(that.overlayTimer);
+      },
+      onDocumentDragLeave: function() {
+        var callback = function() {
+          overlay.fadeOut();
+        };
+        that.overlayTimer = setTimeout(callback, 200);
+      },
+      onDocumentDrop: function() {
+        overlay.fadeOut();
+      },
+      onProgress: function() {
+        console.log('progress', arguments);
+      },
+      onComplete: function() {
+        console.log('complete', arguments);
+      },
+      onAbort: function() {
+        console.log('abort', arguments);
+      },
+      onLoad: function() {
+        console.log('load', arguments);
+      },
+      onError: function() {
+        console.log('error', arguments);
       },
     });
 

@@ -20,6 +20,14 @@
 
   </div>
 
+  <script type="text/template" id="item-template">
+    <a href="/project/<%= id %>"><%= title %></a>
+    (<a href="#" class="delete">X</a>)
+  </script>
+
+{% endblock %}
+
+{% block extra_js %}
   <script type="text/javascript">
     $(function() {
       var projects = new App.Collection.Projects();
@@ -45,10 +53,4 @@
       });
     });
   </script>
-
-  <script type="text/template" id="item-template">
-    <a href="/project/<%= id %>"><%= title %></a>
-    (<a href="#" class="delete">X</a>)
-  </script>
-
 {% endblock %}

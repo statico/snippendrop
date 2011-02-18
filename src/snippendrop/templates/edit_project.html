@@ -5,14 +5,27 @@
   <h1>
     {{ project.title }}
     <button class="new">New snippet</button>
-    <form id="upload" action="/upload" method="POST" enctype="multipart/form-data">
-      <input type="file" name="file" multiple="multiple"/>
+    <form id="file_upload" method="POST" enctype="multipart/form-data"
+          action="/upload/{{ project.id }}/">
+      <input type="hidden" name="protocol" value="http"/>
+      <input type="file" name="file" multiple/>
       <button>Upload</button>
     </form>
   </h1>
 
   <div id="snippet-editor"></div>
 
+  <script type="text/template" class="snippet-template header">
+    <h2><%= title %></h2>
+  </script>
+
+  <script type="text/template" class="snippet-template text">
+    <%= renderedContent %>
+  </script>
+<table id="files"></table>
+{% endblock %}
+
+{% block extra_js %}
   <script type="text/javascript">
     $(function() {
       var project = new App.Model.Project({{ project.to_dict()|tojson|safe }});
@@ -33,13 +46,4 @@
       });
     });
   </script>
-
-  <script type="text/template" class="snippet-template header">
-    <h2><%= title %></h2>
-  </script>
-
-  <script type="text/template" class="snippet-template text">
-    <%= renderedContent %>
-  </script>
-
 {% endblock %}
